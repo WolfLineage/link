@@ -17,6 +17,7 @@ import { ConfigStorageService } from '../services/configStorageService.js';
 import { createSubconverterCompat } from '../services/subconverterCompat.js';
 import { parseKeywordEmojiRules } from '../services/keywordEmojiService.js';
 import { parseKeywordDomains } from '../services/keywordDomainService.js';
+import { applyIpMaskToUriText } from '../services/ipMaskService.js';
 import { ServiceError, MissingDependencyError } from '../services/errors.js';
 import { normalizeRuntime } from '../runtime/runtimeConfig.js';
 import { PREDEFINED_RULE_SETS, SING_BOX_CONFIG, SING_BOX_CONFIG_V1_11, generateSubconverterConfig } from '../config/index.js';
@@ -118,6 +119,7 @@ export function createApp(bindings = {}) {
             );
             builder.setKeywordEmojiRules(parseKeywordEmojiRules(c.req.query('keywordEmoji')));
             builder.setKeywordDomains(parseKeywordDomains(c.req.query('keywordDomains')));
+            builder.setIpMask(c.req.query('ipMask'));
             await builder.build();
             const userinfo = builder.getSubscriptionUserinfo();
             if (userinfo) {
@@ -168,6 +170,7 @@ export function createApp(bindings = {}) {
             );
             builder.setKeywordEmojiRules(parseKeywordEmojiRules(c.req.query('keywordEmoji')));
             builder.setKeywordDomains(parseKeywordDomains(c.req.query('keywordDomains')));
+            builder.setIpMask(c.req.query('ipMask'));
             await builder.build();
             const userinfo = builder.getSubscriptionUserinfo();
             const headers = { 'Content-Type': 'text/yaml; charset=utf-8' };
@@ -213,6 +216,7 @@ export function createApp(bindings = {}) {
             );
             builder.setKeywordEmojiRules(parseKeywordEmojiRules(c.req.query('keywordEmoji')));
             builder.setKeywordDomains(parseKeywordDomains(c.req.query('keywordDomains')));
+            builder.setIpMask(c.req.query('ipMask'));
             builder.setSubscriptionUrl(c.req.url);
             await builder.build();
 
@@ -312,7 +316,8 @@ export function createApp(bindings = {}) {
             }
         }
 
-        const finalString = finalProxyList.join('\n');
+        const ipMaskEnabled = c.req.query('ipMask') === 'true';
+        const finalString = applyIpMaskToUriText(finalProxyList.join('\n'), ipMaskEnabled);
         if (!finalString) {
             return c.text('Missing config parameter', 400);
         }

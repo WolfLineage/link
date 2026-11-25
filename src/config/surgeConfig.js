@@ -13,7 +13,7 @@ export const SURGE_CONFIG = {
 		'allow-hotspot-access': false,
 		'skip-proxy': '127.0.0.1,192.168.0.0/16,10.0.0.0/8,172.16.0.0/12,100.64.0.0/10,17.0.0.0/8,localhost,*.local,*.crashlytics.com,seed-sequoia.siri.apple.com,sequoia.apple.com',
 		'test-timeout': 5,
-		'proxy-test-url': 'http://cp.cloudflare.com/generate_204',
+		'proxy-test-url': 'http://www.gstatic.com/generate_204',
 		'internet-test-url': 'http://www.apple.com/library/test/success.html',
 		'geoip-maxmind-url': 'https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country.mmdb',
 		'ipv6': false,

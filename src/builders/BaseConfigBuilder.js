@@ -4,6 +4,7 @@ import { createTranslator } from '../i18n/index.js';
 import { generateRules, getOutbounds, PREDEFINED_RULE_SETS } from '../config/index.js';
 import { applyKeywordEmojiRules } from '../services/keywordEmojiService.js';
 import { applyKeywordDomains } from '../services/keywordDomainService.js';
+import { applyIpMask } from '../services/ipMaskService.js';
 
 export class BaseConfigBuilder {
     constructor(inputString, baseConfig, lang, userAgent, groupByCountry = false, includeAutoSelect = true) {
@@ -22,6 +23,11 @@ export class BaseConfigBuilder {
         this.subscriptionUserinfo = undefined;
         this.keywordEmojiRules = null;
         this.keywordDomains = null;
+        this.ipMaskEnabled = false;
+    }
+
+    setIpMask(enabled) {
+        this.ipMaskEnabled = enabled === true || enabled === 'true';
     }
 
     setKeywordEmojiRules(rules) {
@@ -37,6 +43,7 @@ export class BaseConfigBuilder {
         // Assign domains while original names still carry keywords, before
         // replace-mode emoji rules may strip them from the node name.
         customItems = applyKeywordDomains(customItems, this.keywordDomains);
+        customItems = applyIpMask(customItems, this.ipMaskEnabled);
         customItems = applyKeywordEmojiRules(customItems, this.keywordEmojiRules);
         this.addCustomItems(customItems);
         this.addSelectors();

@@ -86,6 +86,7 @@ export const formLogicFn = (t) => {
             groupByCountry: false,
             keywordEmoji: '',
             keywordDomains: '',
+            ipMask: false,
             includeAutoSelect: true,
             enableClashUI: false,
             externalController: '',
@@ -135,6 +136,7 @@ export const formLogicFn = (t) => {
                 this.groupByCountry = localStorage.getItem('groupByCountry') === 'true';
                 this.keywordEmoji = localStorage.getItem('keywordEmoji') || '';
                 this.keywordDomains = localStorage.getItem('keywordDomains') || '';
+                this.ipMask = localStorage.getItem('ipMask') === 'true';
                 this.includeAutoSelect = localStorage.getItem('includeAutoSelect') !== 'false';
                 this.enableClashUI = localStorage.getItem('enableClashUI') === 'true';
                 this.externalController = localStorage.getItem('externalController') || '';
@@ -179,6 +181,7 @@ export const formLogicFn = (t) => {
                 this.$watch('groupByCountry', val => localStorage.setItem('groupByCountry', val));
                 this.$watch('keywordEmoji', val => localStorage.setItem('keywordEmoji', val));
                 this.$watch('keywordDomains', val => localStorage.setItem('keywordDomains', val));
+                this.$watch('ipMask', val => localStorage.setItem('ipMask', val));
                 this.$watch('selectedPredefinedRule', val => localStorage.setItem('selectedPredefinedRule', val));
                 this.$watch('selectedRules', val => localStorage.setItem('selectedRules', JSON.stringify(val)), { deep: true });
                 this.$watch('includeAutoSelect', val => localStorage.setItem('includeAutoSelect', val));
@@ -245,6 +248,7 @@ export const formLogicFn = (t) => {
                 if (this.keywordDomains && this.keywordDomains.trim()) {
                     params.append('keywordDomains', this.keywordDomains.trim());
                 }
+                if (this.ipMask) params.append('ipMask', 'true');
 
                 // Include lang parameter so subconverter gets correct group names
                 const appLang = window.APP_LANG || 'zh-CN';
@@ -406,6 +410,7 @@ export const formLogicFn = (t) => {
                     if (this.groupByCountry) params.append('group_by_country', 'true');
                     if (this.keywordEmoji && this.keywordEmoji.trim()) params.append('keywordEmoji', this.keywordEmoji.trim());
                     if (this.keywordDomains && this.keywordDomains.trim()) params.append('keywordDomains', this.keywordDomains.trim());
+                    if (this.ipMask) params.append('ipMask', 'true');
                     if (!this.includeAutoSelect) params.append('include_auto_select', 'false');
                     if (this.enableClashUI) params.append('enable_clash_ui', 'true');
                     if (this.externalController) params.append('external_controller', this.externalController);
@@ -647,6 +652,7 @@ export const formLogicFn = (t) => {
                 this.groupByCountry = params.get('group_by_country') === 'true';
                 if (params.has('keywordEmoji')) this.keywordEmoji = params.get('keywordEmoji') || '';
                 if (params.has('keywordDomains')) this.keywordDomains = params.get('keywordDomains') || '';
+                if (params.has('ipMask')) this.ipMask = params.get('ipMask') === 'true';
                 this.includeAutoSelect = params.get('include_auto_select') !== 'false';
                 this.enableClashUI = params.get('enable_clash_ui') === 'true';
 

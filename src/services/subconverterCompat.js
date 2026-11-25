@@ -48,7 +48,7 @@ function readRuleParams(config) {
     try {
         const url = new URL(config);
         const result = {};
-        for (const key of ['selectedRules', 'customRules', 'group_by_country', 'include_auto_select', 'lang', 'keywordEmoji', 'keywordDomains']) {
+        for (const key of ['selectedRules', 'customRules', 'group_by_country', 'include_auto_select', 'lang', 'keywordEmoji', 'keywordDomains', 'ipMask']) {
             const value = url.searchParams.get(key);
             if (value !== null) result[key] = value;
         }
@@ -94,6 +94,8 @@ export function createSubconverterCompat({ app }) {
         if (keywordEmoji) internalUrl.searchParams.set('keywordEmoji', keywordEmoji);
         const keywordDomains = c.req.query('keywordDomains');
         if (keywordDomains) internalUrl.searchParams.set('keywordDomains', keywordDomains);
+        const ipMask = c.req.query('ipMask');
+        if (ipMask) internalUrl.searchParams.set('ipMask', ipMask);
 
         const lang = c.req.query('lang') || c.get('lang');
         if (lang) internalUrl.searchParams.set('lang', lang);
