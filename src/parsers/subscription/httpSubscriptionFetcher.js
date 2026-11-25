@@ -73,9 +73,15 @@ function decodeContent(text) {
     }
 
     try {
-        const decodedText = decodeUriComponentIfNeeded(decodeBase64(base64Candidate));
-        if (isPlainSubscriptionContent(decodedText)) {
-            return decodedText;
+        const decodedText = decodeBase64(base64Candidate);
+        // Share links carry their own percent-encoded fields (path, ECH, node
+        // names). Decoding the whole payload again corrupts those before the
+        // per-link parsers run; config formats such as Clash YAML still need it.
+        const result = hasSubscriptionUriLine(decodedText)
+            ? decodedText
+            : decodeUriComponentIfNeeded(decodedText);
+        if (isPlainSubscriptionContent(result)) {
+            return result;
         }
     } catch (e) {
         return urlDecodedText;

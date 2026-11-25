@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { createApp } from '../src/app/createApp.jsx';
 import { MemoryKVAdapter } from '../src/adapters/kv/memoryKv.js';
-import { decodeBase64 } from '../src/utils.js';
+import { decodeBase64, encodeBase64 } from '../src/utils.js';
+import http from 'node:http';
 
 const createTestApp = () => createApp({
     kv: new MemoryKVAdapter(),
@@ -101,5 +102,34 @@ describe('subconverter compatibility endpoints', () => {
         expect(res.status).toBe(400);
         const text = await res.text();
         expect(text).toContain('Unsupported target');
+    });
+});
+
+describe('base64 share-link subscriptions with encoded fields', () => {
+    it('preserves node names when links contain percent-encoded ECH/path values', async () => {
+        const link = 'vless://' +
+            '00000000-0000-4000-8000-000000000000@1.2.3.4:443' +
+            '?security=tls&type=ws' +
+            '&ech=cloudflare-ech.com%2Bhttps%3A%2F%2Fdns.example.com%2Fdns-query' +
+            '&path=%2Fvideo%2Fturn%3D1.2.3.4%3A443' +
+            '&encryption=none' +
+            '#%5BEDT%5D%20HK%20Node';
+        const server = http.createServer((req, res) => {
+            res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
+            res.end(encodeBase64(link));
+        });
+        await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+
+        try {
+            const subEndpoint = `http://127.0.0.1:${server.address().port}/sub?token=edt`;
+            const app = createTestApp();
+            const res = await app.request(subUrl({ target: 'clash', url: subEndpoint }));
+            expect(res.status).toBe(200);
+            const text = await res.text();
+            expect(text).toContain('[EDT] HK Node');
+            expect(text).toContain('server: 1.2.3.4');
+        } finally {
+            server.close();
+        }
     });
 });
