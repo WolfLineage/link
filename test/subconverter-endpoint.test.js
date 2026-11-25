@@ -126,8 +126,8 @@ describe('GET /subconverter', () => {
         const res = await app.request(`http://localhost/subconverter?selectedRules=${encodeURIComponent(rules)}`);
         const text = await res.text();
 
-        // Ad Block group should have REJECT as first option
-        expect(text).toMatch(/custom_proxy_group=.*广告拦截.*select.*\[]REJECT/);
+        // Ad Block traffic is routed straight to REJECT (no selectable ad group).
+        expect(text).toMatch(/ruleset=REJECT,\[]GEOSITE,category-ads-all/);
     });
 
     it('maps Private and Location:CN to DIRECT', async () => {

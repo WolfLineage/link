@@ -28,7 +28,6 @@ export const SING_BOX_CONFIG = {
 				type: "fakeip",
 				tag: "dns_fakeip",
 				inet4_range: "198.18.0.0/15",
-				inet6_range: "fc00::/18"
 			}
 		],
 		rules: [
@@ -189,7 +188,6 @@ export const SING_BOX_CONFIG_V1_11 = {
 		fakeip: {
 			enabled: true,
 			inet4_range: "198.18.0.0/15",
-			inet6_range: "fc00::/18"
 		}
 	},
 	ntp: {

@@ -581,6 +581,14 @@ export class SingboxConfigBuilder extends BaseConfigBuilder {
         this.config.route ??= {};
         this.config.route.rules ??= [];
 
+        // Disable IPv6 by rejecting all IPv6 traffic before other rules.
+        const hasIpv6Off = this.config.route.rules.some(rule =>
+            rule?.ip_version === 6 && rule?.action === 'reject'
+        );
+        if (!hasIpv6Off) {
+            this.config.route.rules.unshift({ ip_version: 6, action: 'reject' });
+        }
+
         // Subscription route overrides must not make node bootstrap depend on proxy DNS.
         if (this.singboxVersion !== '1.11' && !this.config.route.default_domain_resolver) {
             const bootstrapResolver = (this.config.dns?.servers || []).find(server =>

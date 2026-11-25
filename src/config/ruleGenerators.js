@@ -3,7 +3,7 @@
  * Functions for generating rules and rule sets
  */
 
-import { UNIFIED_RULES, PREDEFINED_RULE_SETS } from './rules.js';
+import { UNIFIED_RULES, PREDEFINED_RULE_SETS, resolveOutbound } from './rules.js';
 import { SITE_RULE_SET_BASE_URL, IP_RULE_SET_BASE_URL, CLASH_SITE_RULE_SET_BASE_URL, CLASH_IP_RULE_SET_BASE_URL } from './ruleUrls.js';
 
 function toStringArray(value) {
@@ -58,7 +58,7 @@ export function generateRules(selectedRules = [], customRules = []) {
 				ip_rules: rule.ip_rules,
 				domain_suffix: rule?.domain_suffix,
 				ip_cidr: rule?.ip_cidr,
-				outbound: rule.name
+				outbound: resolveOutbound(rule.name)
 			});
 		}
 	});
