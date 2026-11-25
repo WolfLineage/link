@@ -376,6 +376,11 @@ export class SurgeConfigBuilder extends BaseConfigBuilder {
     }
 
     formatConfig() {
+        // Force IPv6 off even when a saved custom base config enables it.
+        if (this.config.general && typeof this.config.general === 'object') {
+            this.config.general.ipv6 = false;
+        }
+
         const rules = generateRules(this.selectedRules, this.customRules);
         const ruleTarget = (outbound) => outbound === 'REJECT'
             ? 'REJECT'

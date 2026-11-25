@@ -678,6 +678,12 @@ export class ClashConfigBuilder extends BaseConfigBuilder {
     }
 
     formatConfig() {
+        // Force IPv6 off even when a saved custom base config enables it.
+        this.config.ipv6 = false;
+        if (this.config.dns && typeof this.config.dns === 'object') {
+            this.config.dns.ipv6 = false;
+        }
+
         const rules = this.generateRules();
         const useMrs = supportsMrsFormat(this.userAgent);
         const { site_rule_providers, ip_rule_providers } = generateClashRuleSets(this.selectedRules, this.customRules, useMrs);

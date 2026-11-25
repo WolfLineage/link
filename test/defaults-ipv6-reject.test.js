@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 import yaml from 'js-yaml';
 import { createApp } from '../src/app/createApp.jsx';
 import { MemoryKVAdapter } from '../src/adapters/kv/memoryKv.js';
+import { ClashConfigBuilder } from '../src/builders/ClashConfigBuilder.js';
+import { CLASH_CONFIG } from '../src/config/clashConfig.js';
 
 const createTestApp = () => createApp({
     kv: new MemoryKVAdapter(), assetFetcher: null, logger: console,
@@ -37,5 +39,18 @@ describe('IPv6 off and ad traffic REJECT by default', () => {
         expect(text).toContain('ipv6 = false');
         expect(/category-ads-all\.conf,REJECT/.test(text)).toBe(true);
         expect(/广告拦截 = select/.test(text)).toBe(false);
+    });
+});
+
+
+describe('IPv6 forced off with custom base config', () => {
+    it('clash overrides base config ipv6:true', async () => {
+        const base = JSON.parse(JSON.stringify(CLASH_CONFIG));
+        base.ipv6 = true;
+        base.dns.ipv6 = true;
+        const builder = new ClashConfigBuilder(SS, 'minimal', [], base, 'zh-CN', 'test-agent');
+        const config = yaml.load(await builder.build());
+        expect(config.ipv6).toBe(false);
+        expect(config.dns.ipv6).toBe(false);
     });
 });
