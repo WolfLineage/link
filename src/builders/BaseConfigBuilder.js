@@ -3,6 +3,7 @@ import { createStableProviderName, deepCopy, tryDecodeSubscriptionLines, decodeB
 import { createTranslator } from '../i18n/index.js';
 import { generateRules, getOutbounds, PREDEFINED_RULE_SETS } from '../config/index.js';
 import { applyKeywordEmojiRules } from '../services/keywordEmojiService.js';
+import { applyKeywordDomains } from '../services/keywordDomainService.js';
 
 export class BaseConfigBuilder {
     constructor(inputString, baseConfig, lang, userAgent, groupByCountry = false, includeAutoSelect = true) {
@@ -20,14 +21,22 @@ export class BaseConfigBuilder {
         this.autoProviderDescriptors = undefined;
         this.subscriptionUserinfo = undefined;
         this.keywordEmojiRules = null;
+        this.keywordDomains = null;
     }
 
     setKeywordEmojiRules(rules) {
         this.keywordEmojiRules = rules;
     }
 
+    setKeywordDomains(pools) {
+        this.keywordDomains = pools;
+    }
+
     async build() {
         let customItems = await this.parseCustomItems();
+        // Assign domains while original names still carry keywords, before
+        // replace-mode emoji rules may strip them from the node name.
+        customItems = applyKeywordDomains(customItems, this.keywordDomains);
         customItems = applyKeywordEmojiRules(customItems, this.keywordEmojiRules);
         this.addCustomItems(customItems);
         this.addSelectors();

@@ -16,6 +16,7 @@ import { ShortLinkService } from '../services/shortLinkService.js';
 import { ConfigStorageService } from '../services/configStorageService.js';
 import { createSubconverterCompat } from '../services/subconverterCompat.js';
 import { parseKeywordEmojiRules } from '../services/keywordEmojiService.js';
+import { parseKeywordDomains } from '../services/keywordDomainService.js';
 import { ServiceError, MissingDependencyError } from '../services/errors.js';
 import { normalizeRuntime } from '../runtime/runtimeConfig.js';
 import { PREDEFINED_RULE_SETS, SING_BOX_CONFIG, SING_BOX_CONFIG_V1_11, generateSubconverterConfig } from '../config/index.js';
@@ -116,6 +117,7 @@ export function createApp(bindings = {}) {
                 includeAutoSelect
             );
             builder.setKeywordEmojiRules(parseKeywordEmojiRules(c.req.query('keywordEmoji')));
+            builder.setKeywordDomains(parseKeywordDomains(c.req.query('keywordDomains')));
             await builder.build();
             const userinfo = builder.getSubscriptionUserinfo();
             if (userinfo) {
@@ -165,6 +167,7 @@ export function createApp(bindings = {}) {
                 includeAutoSelect
             );
             builder.setKeywordEmojiRules(parseKeywordEmojiRules(c.req.query('keywordEmoji')));
+            builder.setKeywordDomains(parseKeywordDomains(c.req.query('keywordDomains')));
             await builder.build();
             const userinfo = builder.getSubscriptionUserinfo();
             const headers = { 'Content-Type': 'text/yaml; charset=utf-8' };
@@ -209,6 +212,7 @@ export function createApp(bindings = {}) {
                 includeAutoSelect
             );
             builder.setKeywordEmojiRules(parseKeywordEmojiRules(c.req.query('keywordEmoji')));
+            builder.setKeywordDomains(parseKeywordDomains(c.req.query('keywordDomains')));
             builder.setSubscriptionUrl(c.req.url);
             await builder.build();
 

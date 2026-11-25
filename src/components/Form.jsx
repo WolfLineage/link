@@ -192,6 +192,22 @@ export const Form = (props) => {
                 </p>
               </div>
 
+              <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/30">
+                <label class="flex items-center gap-2 mb-2">
+                  <i class="fas fa-server text-gray-400"></i>
+                  <span class="font-medium text-gray-700 dark:text-gray-300">关键词域名池 (Keyword Domains)</span>
+                </label>
+                <textarea
+                  x-model="keywordDomains"
+                  rows="4"
+                  placeholder={'HK=voxy-hk-1.pages.dev\nHK=voxy-hk-2.pages.dev\nUS=voxy-us-1.pages.dev'}
+                  class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-primary-500 focus:border-transparent font-mono"
+                />
+                <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                  每行一条：关键词=域名。同一关键词写多行组成域名池；节点按名称关键词匹配后，从对应池中随机选一个域名作为 SNI/Host，用于多账号负载均衡。
+                </p>
+              </div>
+
               <label class="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/30 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors cursor-pointer">
                 <span class="font-medium text-gray-700 dark:text-gray-300">{t('includeAutoSelect')}</span>
                 <div class="relative inline-flex items-center cursor-pointer">
