@@ -68,6 +68,20 @@ describe('subconverter compatibility endpoints', () => {
         expect(decoded).toContain('ss://');
     });
 
+    it('passes group_by_country from the top-level /sub query', async () => {
+        const groupedLink = 'ss://YWVzLTI1Ni1nY206cGFzc3dvcmQ@1.2.3.4:8388#HK Node';
+        const app = createTestApp();
+        const res = await app.request(subUrl({
+            target: 'clash',
+            url: groupedLink,
+            group_by_country: 'true'
+        }));
+        expect(res.status).toBe(200);
+        const text = await res.text();
+        expect(text).toContain('Hong Kong');
+        expect(text).toContain('手动切换');
+    });
+
     it('accepts pipe-separated subscriptions', async () => {
         const app = createTestApp();
         const res = await app.request(subUrl({

@@ -96,6 +96,8 @@ export function createSubconverterCompat({ app }) {
         if (keywordDomains) internalUrl.searchParams.set('keywordDomains', keywordDomains);
         const ipMask = c.req.query('ipMask');
         if (ipMask) internalUrl.searchParams.set('ipMask', ipMask);
+        const groupByCountry = c.req.query('group_by_country');
+        if (groupByCountry) internalUrl.searchParams.set('group_by_country', groupByCountry);
 
         const lang = c.req.query('lang') || c.get('lang');
         if (lang) internalUrl.searchParams.set('lang', lang);
