@@ -48,7 +48,7 @@ function readRuleParams(config) {
     try {
         const url = new URL(config);
         const result = {};
-        for (const key of ['selectedRules', 'customRules', 'group_by_country', 'include_auto_select', 'lang', 'regionDomains']) {
+        for (const key of ['selectedRules', 'customRules', 'group_by_country', 'include_auto_select', 'lang', 'keywordEmoji']) {
             const value = url.searchParams.get(key);
             if (value !== null) result[key] = value;
         }
@@ -90,8 +90,8 @@ export function createSubconverterCompat({ app }) {
             internalUrl.searchParams.set(key, value);
         }
 
-        const regionDomains = c.req.query('regionDomains');
-        if (regionDomains) internalUrl.searchParams.set('regionDomains', regionDomains);
+        const keywordEmoji = c.req.query('keywordEmoji');
+        if (keywordEmoji) internalUrl.searchParams.set('keywordEmoji', keywordEmoji);
 
         const lang = c.req.query('lang') || c.get('lang');
         if (lang) internalUrl.searchParams.set('lang', lang);

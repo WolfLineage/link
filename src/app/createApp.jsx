@@ -15,7 +15,7 @@ import { APP_NAME, APP_SUBTITLE } from '../constants.js';
 import { ShortLinkService } from '../services/shortLinkService.js';
 import { ConfigStorageService } from '../services/configStorageService.js';
 import { createSubconverterCompat } from '../services/subconverterCompat.js';
-import { parseRegionDomains } from '../services/regionDomainService.js';
+import { parseKeywordEmojiRules } from '../services/keywordEmojiService.js';
 import { ServiceError, MissingDependencyError } from '../services/errors.js';
 import { normalizeRuntime } from '../runtime/runtimeConfig.js';
 import { PREDEFINED_RULE_SETS, SING_BOX_CONFIG, SING_BOX_CONFIG_V1_11, generateSubconverterConfig } from '../config/index.js';
@@ -115,7 +115,7 @@ export function createApp(bindings = {}) {
                 singboxConfigVersion,
                 includeAutoSelect
             );
-            builder.setRegionDomains(parseRegionDomains(c.req.query('regionDomains')));
+            builder.setKeywordEmojiRules(parseKeywordEmojiRules(c.req.query('keywordEmoji')));
             await builder.build();
             const userinfo = builder.getSubscriptionUserinfo();
             if (userinfo) {
@@ -164,7 +164,7 @@ export function createApp(bindings = {}) {
                 externalUiDownloadUrl,
                 includeAutoSelect
             );
-            builder.setRegionDomains(parseRegionDomains(c.req.query('regionDomains')));
+            builder.setKeywordEmojiRules(parseKeywordEmojiRules(c.req.query('keywordEmoji')));
             await builder.build();
             const userinfo = builder.getSubscriptionUserinfo();
             const headers = { 'Content-Type': 'text/yaml; charset=utf-8' };
@@ -208,7 +208,7 @@ export function createApp(bindings = {}) {
                 groupByCountry,
                 includeAutoSelect
             );
-            builder.setRegionDomains(parseRegionDomains(c.req.query('regionDomains')));
+            builder.setKeywordEmojiRules(parseKeywordEmojiRules(c.req.query('keywordEmoji')));
             builder.setSubscriptionUrl(c.req.url);
             await builder.build();
 

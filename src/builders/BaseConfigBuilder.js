@@ -2,7 +2,7 @@ import { ProxyParser } from '../parsers/index.js';
 import { createStableProviderName, deepCopy, tryDecodeSubscriptionLines, decodeBase64 } from '../utils.js';
 import { createTranslator } from '../i18n/index.js';
 import { generateRules, getOutbounds, PREDEFINED_RULE_SETS } from '../config/index.js';
-import { applyRegionDomains } from '../services/regionDomainService.js';
+import { applyKeywordEmojiRules } from '../services/keywordEmojiService.js';
 
 export class BaseConfigBuilder {
     constructor(inputString, baseConfig, lang, userAgent, groupByCountry = false, includeAutoSelect = true) {
@@ -19,16 +19,16 @@ export class BaseConfigBuilder {
         this.providerNodeNames = [];  // node names from provider subscriptions, for country enumeration only
         this.autoProviderDescriptors = undefined;
         this.subscriptionUserinfo = undefined;
-        this.regionDomains = null;
+        this.keywordEmojiRules = null;
     }
 
-    setRegionDomains(mapping) {
-        this.regionDomains = mapping;
+    setKeywordEmojiRules(rules) {
+        this.keywordEmojiRules = rules;
     }
 
     async build() {
         let customItems = await this.parseCustomItems();
-        customItems = applyRegionDomains(customItems, this.regionDomains);
+        customItems = applyKeywordEmojiRules(customItems, this.keywordEmojiRules);
         this.addCustomItems(customItems);
         this.addSelectors();
         return this.formatConfig();

@@ -84,7 +84,7 @@ export const formLogicFn = (t) => {
             selectedPredefinedRule: 'balanced',
             subconverterCopied: false,
             groupByCountry: false,
-            regionDomains: '',
+            keywordEmoji: '',
             includeAutoSelect: true,
             enableClashUI: false,
             externalController: '',
@@ -132,7 +132,7 @@ export const formLogicFn = (t) => {
                 this.input = localStorage.getItem('inputTextarea') || '';
                 this.showAdvanced = localStorage.getItem('advancedToggle') === 'true';
                 this.groupByCountry = localStorage.getItem('groupByCountry') === 'true';
-                this.regionDomains = localStorage.getItem('regionDomains') || '';
+                this.keywordEmoji = localStorage.getItem('keywordEmoji') || '';
                 this.includeAutoSelect = localStorage.getItem('includeAutoSelect') !== 'false';
                 this.enableClashUI = localStorage.getItem('enableClashUI') === 'true';
                 this.externalController = localStorage.getItem('externalController') || '';
@@ -164,7 +164,7 @@ export const formLogicFn = (t) => {
                 });
                 this.$watch('showAdvanced', val => localStorage.setItem('advancedToggle', val));
                 this.$watch('groupByCountry', val => localStorage.setItem('groupByCountry', val));
-                this.$watch('regionDomains', val => localStorage.setItem('regionDomains', val));
+                this.$watch('keywordEmoji', val => localStorage.setItem('keywordEmoji', val));
                 this.$watch('includeAutoSelect', val => localStorage.setItem('includeAutoSelect', val));
                 this.$watch('enableClashUI', val => localStorage.setItem('enableClashUI', val));
                 this.$watch('externalController', val => localStorage.setItem('externalController', val));
@@ -223,8 +223,8 @@ export const formLogicFn = (t) => {
                 if (this.groupByCountry) {
                     params.append('group_by_country', 'true');
                 }
-                if (this.regionDomains && this.regionDomains.trim()) {
-                    params.append('regionDomains', this.regionDomains.trim());
+                if (this.keywordEmoji && this.keywordEmoji.trim()) {
+                    params.append('keywordEmoji', this.keywordEmoji.trim());
                 }
 
                 // Include lang parameter so subconverter gets correct group names
@@ -385,7 +385,7 @@ export const formLogicFn = (t) => {
                     params.append('customRules', JSON.stringify(customRules));
 
                     if (this.groupByCountry) params.append('group_by_country', 'true');
-                    if (this.regionDomains && this.regionDomains.trim()) params.append('regionDomains', this.regionDomains.trim());
+                    if (this.keywordEmoji && this.keywordEmoji.trim()) params.append('keywordEmoji', this.keywordEmoji.trim());
                     if (!this.includeAutoSelect) params.append('include_auto_select', 'false');
                     if (this.enableClashUI) params.append('enable_clash_ui', 'true');
                     if (this.externalController) params.append('external_controller', this.externalController);
@@ -625,7 +625,7 @@ export const formLogicFn = (t) => {
 
                 // Extract other parameters
                 this.groupByCountry = params.get('group_by_country') === 'true';
-                if (params.has('regionDomains')) this.regionDomains = params.get('regionDomains') || '';
+                if (params.has('keywordEmoji')) this.keywordEmoji = params.get('keywordEmoji') || '';
                 this.includeAutoSelect = params.get('include_auto_select') !== 'false';
                 this.enableClashUI = params.get('enable_clash_ui') === 'true';
 
