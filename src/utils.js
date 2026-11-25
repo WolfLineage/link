@@ -155,7 +155,8 @@ export function tryDecodeSubscriptionLines(input, { decodeUriComponent = false }
 	return trimmed;
 }
 
-export function groupProxiesByCountry(proxies, { getName } = {}) {
+export function groupProxiesByCountry(proxies, { getName, resolveCountry } = {}) {
+	const resolve = typeof resolveCountry === 'function' ? resolveCountry : parseCountryFromNodeName;
 	const extractor = typeof getName === 'function'
 		? getName
 		: (proxy) => {
@@ -198,7 +199,7 @@ export function groupProxiesByCountry(proxies, { getName } = {}) {
 		if (!proxyName) {
 			return;
 		}
-		const countryInfo = parseCountryFromNodeName(proxyName);
+		const countryInfo = resolve(proxyName);
 		if (!countryInfo) {
 			return;
 		}
@@ -409,9 +410,12 @@ export function parseCountryFromNodeName(nodeName) {
 	// (e.g. "Indonesia" before "India", "United States" before "US").
 	// Short aliases (<=3 chars, all ASCII, e.g. US, UK, HK) get \b word boundaries
 	// to prevent false positives like "plus" matching "US".
-	const allEntries = Object.values(COUNTRY_DATA).flatMap(c =>
-		c.aliases.map(alias => ({ alias, escaped: alias.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') }))
-	);
+	const allEntries = Object.values(COUNTRY_DATA).flatMap(c => {
+		// Emoji counts as an alias too: replace-mode rules strip the text code
+		// (e.g. "HK") and leave only the flag, which must still map to a country.
+		const aliases = [...c.aliases, c.emoji];
+		return aliases.map(alias => ({ alias, escaped: alias.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') }));
+	});
 	allEntries.sort((a, b) => b.alias.length - a.alias.length);
 
 	const patterns = allEntries.map(({ alias, escaped }) => {
@@ -427,9 +431,10 @@ export function parseCountryFromNodeName(nodeName) {
 	if (match) {
 		const matchedAlias = match[0];
 		for (const code in COUNTRY_DATA) {
-			if (COUNTRY_DATA[code].aliases.some(alias => alias.toLowerCase() === matchedAlias.toLowerCase())) {
-				return { code, ...COUNTRY_DATA[code] };
-			}
+			const country = COUNTRY_DATA[code];
+			const matches = [...country.aliases, country.emoji]
+				.some(alias => alias.toLowerCase() === matchedAlias.toLowerCase());
+			if (matches) return { code, ...country };
 		}
 	}
 

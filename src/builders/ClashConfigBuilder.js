@@ -483,7 +483,8 @@ export class ClashConfigBuilder extends BaseConfigBuilder {
     addCountryGroups() {
         const proxies = this.getProxies();
         const countryGroups = groupProxiesByCountry(proxies, {
-            getName: proxy => this.getProxyName(proxy)
+            getName: proxy => this.getProxyName(proxy),
+            resolveCountry: name => this.resolveCountryFromName(name)
         });
 
         // Provider mode leaves no inline proxies, but mihomo can filter provider

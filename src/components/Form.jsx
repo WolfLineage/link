@@ -178,6 +178,22 @@ export const Form = (props) => {
 
               <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/30">
                 <label class="flex items-center gap-2 mb-2">
+                  <i class="fas fa-globe text-gray-400"></i>
+                  <span class="font-medium text-gray-700 dark:text-gray-300">关键词 Emoji 规则 (Keyword Emoji)</span>
+                </label>
+                <textarea
+                  x-model="keywordEmoji"
+                  rows="4"
+                  placeholder={'HK 🇭🇰 add\nJP 🇯🇵 add\n香港 🇭🇰 replace\nUS 🇺🇸 replace'}
+                  class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-primary-500 focus:border-transparent font-mono"
+                />
+                <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                  每行一条：关键词 + 空格 + emoji + 空格 + 模式。add=在关键词前加 emoji 并保留原文；replace=用 emoji 替换关键词（不显示原文）。模式省略时默认为 add。关键词可含空格。
+                </p>
+              </div>
+
+              <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/30">
+                <label class="flex items-center gap-2 mb-2">
                   <i class="fas fa-server text-gray-400"></i>
                   <span class="font-medium text-gray-700 dark:text-gray-300">关键词域名池 (Keyword Domains)</span>
                 </label>

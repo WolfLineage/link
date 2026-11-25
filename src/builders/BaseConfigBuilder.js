@@ -1,8 +1,9 @@
 import { ProxyParser } from '../parsers/index.js';
-import { createStableProviderName, deepCopy, tryDecodeSubscriptionLines, decodeBase64 } from '../utils.js';
+import { createStableProviderName, deepCopy, tryDecodeSubscriptionLines, decodeBase64, parseCountryFromNodeName } from '../utils.js';
 import { createTranslator } from '../i18n/index.js';
 import { generateRules, getOutbounds, PREDEFINED_RULE_SETS } from '../config/index.js';
 import { applyKeywordDomains } from '../services/keywordDomainService.js';
+import { applyKeywordEmojiRules, buildEmojiCountryMap } from '../services/keywordEmojiService.js';
 import { applyIpMask } from '../services/ipMaskService.js';
 
 export class BaseConfigBuilder {
@@ -21,6 +22,7 @@ export class BaseConfigBuilder {
         this.autoProviderDescriptors = undefined;
         this.subscriptionUserinfo = undefined;
         this.keywordDomains = null;
+        this.keywordEmojiRules = null;
         this.ipMaskEnabled = false;
     }
 
@@ -32,11 +34,28 @@ export class BaseConfigBuilder {
         this.keywordDomains = pools;
     }
 
+    setKeywordEmojiRules(rules) {
+        this.keywordEmojiRules = rules;
+        this.emojiCountryMap = buildEmojiCountryMap(rules);
+    }
+
+    // Country detection prefers the user-configured emoji so the group label
+    // reflects the flag the user chose, not the hardcoded one.
+    resolveCountryFromName(name) {
+        if (this.emojiCountryMap) {
+            for (const [emoji, info] of Object.entries(this.emojiCountryMap)) {
+                if (typeof name === 'string' && name.includes(emoji)) return info;
+            }
+        }
+        return parseCountryFromNodeName(name);
+    }
+
     async build() {
         let customItems = await this.parseCustomItems();
         // Assign domains from keyword pools (before any other name changes).
         customItems = applyKeywordDomains(customItems, this.keywordDomains);
         customItems = applyIpMask(customItems, this.ipMaskEnabled);
+        customItems = applyKeywordEmojiRules(customItems, this.keywordEmojiRules);
         this.addCustomItems(customItems);
         this.addSelectors();
         return this.formatConfig();
