@@ -125,4 +125,22 @@ vmess://ewogICJ2IjogIjIiLAogICJwcyI6ICJ0dzEubm9kZS5jb20iLAogICJhZGQiOiAidHcxLm5v
             expect(parseCountryFromNodeName('🇺🇸 TG:@VoxyChannel')).toMatchObject({ code: 'US' });
         });
     });
+
+    it('uses the user-configured emoji in country group names', async () => {
+        const { parseKeywordEmojiRules } = await import('../src/services/keywordEmojiService.js');
+        const input = `
+ss://YWVzLTEyOC1nY206dGVzdA@example.com:443#HK-Node-1
+ss://YWVzLTEyOC1nY206dGVzdA@example.com:444#US-Node-1
+        `;
+        const builder = new ClashConfigBuilder(input, 'minimal', [], null, 'zh-CN', 'test-agent', true);
+        // Custom (non-flag) emoji for HK, standard flag left default for US.
+        builder.setKeywordEmojiRules(parseKeywordEmojiRules('HK 🚀 replace\nUS 🇺🇸 replace'));
+        await builder.build();
+        const built = yaml.load(builder.formatConfig());
+        const names = (built['proxy-groups'] || []).map(g => g.name);
+
+        expect(names).toContain('🚀 Hong Kong');
+        expect(names).toContain('🇺🇸 United States');
+        expect(names).not.toContain('🇭🇰 Hong Kong');
+    });
 });

@@ -155,7 +155,8 @@ export function tryDecodeSubscriptionLines(input, { decodeUriComponent = false }
 	return trimmed;
 }
 
-export function groupProxiesByCountry(proxies, { getName } = {}) {
+export function groupProxiesByCountry(proxies, { getName, resolveCountry } = {}) {
+	const resolve = typeof resolveCountry === 'function' ? resolveCountry : parseCountryFromNodeName;
 	const extractor = typeof getName === 'function'
 		? getName
 		: (proxy) => {
@@ -198,7 +199,7 @@ export function groupProxiesByCountry(proxies, { getName } = {}) {
 		if (!proxyName) {
 			return;
 		}
-		const countryInfo = parseCountryFromNodeName(proxyName);
+		const countryInfo = resolve(proxyName);
 		if (!countryInfo) {
 			return;
 		}

@@ -6,10 +6,33 @@
  * Keywords may contain spaces; parsing is done from the right.
  */
 
+import { parseCountryFromNodeName, COUNTRY_DATA } from '../utils.js';
+
 const MODES = new Set(['add', 'replace']);
 
 function escapeRegex(value) {
     return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * Map each configured emoji to the country resolved from its keyword.
+ * Group names then display the user's emoji instead of the hardcoded flag.
+ */
+export function buildEmojiCountryMap(rules) {
+    const map = {};
+    if (!Array.isArray(rules)) return map;
+
+    for (const rule of rules) {
+        const info = parseCountryFromNodeName(rule.keyword);
+        if (!info) continue;
+        // Keep the country name from COUNTRY_DATA; only the emoji is user-driven.
+        map[rule.emoji] = { ...info, emoji: rule.emoji };
+    }
+    return map;
+}
+
+export function isStandardCountryEmoji(emoji) {
+    return Object.values(COUNTRY_DATA).some(c => c.emoji === emoji);
 }
 
 export function parseKeywordEmojiRules(raw) {
