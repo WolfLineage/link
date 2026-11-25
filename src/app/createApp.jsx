@@ -24,6 +24,18 @@ import { PREDEFINED_RULE_SETS, SING_BOX_CONFIG, SING_BOX_CONFIG_V1_11, generateS
 
 const DEFAULT_USER_AGENT = 'curl/7.74.0';
 
+// Default flags applied when the caller (EDT -> link) does not pass keywordEmoji.
+// Keeps node names and country groups on the same flag, falling back to the
+// built-in flag for any region without a configured keyword.
+const DEFAULT_KEYWORD_EMOJI = [
+    'HK 🇭🇰 add',
+    'JP 🇯🇵 add',
+    'KR 🇰🇷 replace',
+    'TW 🇹🇼 add',
+    'SG 🇸🇬 add',
+    'US 🇺🇸 replace'
+].join('\n');
+
 export function createApp(bindings = {}) {
     const runtime = normalizeRuntime(bindings);
     const services = {
@@ -117,7 +129,7 @@ export function createApp(bindings = {}) {
                 singboxConfigVersion,
                 includeAutoSelect
             );
-            builder.setKeywordEmojiRules(parseKeywordEmojiRules(c.req.query('keywordEmoji')));
+            builder.setKeywordEmojiRules(parseKeywordEmojiRules(c.req.query('keywordEmoji') || DEFAULT_KEYWORD_EMOJI));
             builder.setKeywordDomains(parseKeywordDomains(c.req.query('keywordDomains')));
             builder.setIpMask(c.req.query('ipMask'));
             await builder.build();
@@ -168,7 +180,7 @@ export function createApp(bindings = {}) {
                 externalUiDownloadUrl,
                 includeAutoSelect
             );
-            builder.setKeywordEmojiRules(parseKeywordEmojiRules(c.req.query('keywordEmoji')));
+            builder.setKeywordEmojiRules(parseKeywordEmojiRules(c.req.query('keywordEmoji') || DEFAULT_KEYWORD_EMOJI));
             builder.setKeywordDomains(parseKeywordDomains(c.req.query('keywordDomains')));
             builder.setIpMask(c.req.query('ipMask'));
             await builder.build();
@@ -214,7 +226,7 @@ export function createApp(bindings = {}) {
                 groupByCountry,
                 includeAutoSelect
             );
-            builder.setKeywordEmojiRules(parseKeywordEmojiRules(c.req.query('keywordEmoji')));
+            builder.setKeywordEmojiRules(parseKeywordEmojiRules(c.req.query('keywordEmoji') || DEFAULT_KEYWORD_EMOJI));
             builder.setKeywordDomains(parseKeywordDomains(c.req.query('keywordDomains')));
             builder.setIpMask(c.req.query('ipMask'));
             builder.setSubscriptionUrl(c.req.url);
