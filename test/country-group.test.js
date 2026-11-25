@@ -119,5 +119,10 @@ vmess://ewogICJ2IjogIjIiLAogICJwcyI6ICJ0dzEubm9kZS5jb20iLAogICJhZGQiOiAidHcxLm5v
             expect(parseCountryFromNodeName('Indonesia-1')).toMatchObject({ code: 'ID' });
             expect(parseCountryFromNodeName('印度尼西亚节点')).toMatchObject({ code: 'ID' });
         });
+
+        it('should recognize emoji after replace mode strips the text code', () => {
+            expect(parseCountryFromNodeName('🇭🇰 TG:@VoxyChannel')).toMatchObject({ code: 'HK' });
+            expect(parseCountryFromNodeName('🇺🇸 TG:@VoxyChannel')).toMatchObject({ code: 'US' });
+        });
     });
 });
