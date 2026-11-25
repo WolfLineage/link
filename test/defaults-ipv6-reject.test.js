@@ -55,14 +55,3 @@ describe('IPv6 forced off with custom base config', () => {
     });
 });
 
-describe('default keyword emoji flags', () => {
-    it('applies flags with no keywordEmoji param and disables with 0', async () => {
-        const app = createTestApp();
-        const ss = 'ss://YWVzLTI1Ni1nY206cGFzc3dvcmQ@1.2.3.4:8388#HK TG:@VoxyChannel';
-        const withFlags = yaml.load(await (await app.request('http://localhost/clash?config=' + encodeURIComponent(ss))).text());
-        expect(withFlags.proxies[0].name).toBe('🇭🇰 HK TG:@VoxyChannel');
-
-        const noFlags = yaml.load(await (await app.request('http://localhost/clash?config=' + encodeURIComponent(ss) + '&keywordEmoji=0')).text());
-        expect(noFlags.proxies[0].name).toBe('HK TG:@VoxyChannel');
-    });
-});

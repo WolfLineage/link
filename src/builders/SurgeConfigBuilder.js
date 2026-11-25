@@ -323,8 +323,7 @@ export class SurgeConfigBuilder extends BaseConfigBuilder {
     addCountryGroups() {
         const proxies = this.getValidProxies();
         const countryGroups = groupProxiesByCountry(proxies, {
-            getName: proxy => this.getProxyName(proxy),
-            resolveCountry: name => this.resolveCountryFromName(name)
+            getName: proxy => this.getProxyName(proxy)
         });
 
         const existing = new Set((this.config['proxy-groups'] || [])

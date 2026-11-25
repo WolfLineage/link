@@ -137,8 +137,7 @@ describe('base64 share-link subscriptions with encoded fields', () => {
         try {
             const subEndpoint = `http://127.0.0.1:${server.address().port}/sub?token=edt`;
             const app = createTestApp();
-            // Disable default flag rules so this test checks only name decoding.
-            const res = await app.request(subUrl({ target: 'clash', url: subEndpoint, keywordEmoji: '0' }));
+            const res = await app.request(subUrl({ target: 'clash', url: subEndpoint }));
             expect(res.status).toBe(200);
             const text = await res.text();
             expect(text).toContain('[EDT] HK Node');

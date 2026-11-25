@@ -1,8 +1,7 @@
 import { ProxyParser } from '../parsers/index.js';
-import { createStableProviderName, deepCopy, tryDecodeSubscriptionLines, decodeBase64, parseCountryFromNodeName } from '../utils.js';
+import { createStableProviderName, deepCopy, tryDecodeSubscriptionLines, decodeBase64 } from '../utils.js';
 import { createTranslator } from '../i18n/index.js';
 import { generateRules, getOutbounds, PREDEFINED_RULE_SETS } from '../config/index.js';
-import { applyKeywordEmojiRules, buildEmojiCountryMap } from '../services/keywordEmojiService.js';
 import { applyKeywordDomains } from '../services/keywordDomainService.js';
 import { applyIpMask } from '../services/ipMaskService.js';
 
@@ -21,7 +20,6 @@ export class BaseConfigBuilder {
         this.providerNodeNames = [];  // node names from provider subscriptions, for country enumeration only
         this.autoProviderDescriptors = undefined;
         this.subscriptionUserinfo = undefined;
-        this.keywordEmojiRules = null;
         this.keywordDomains = null;
         this.ipMaskEnabled = false;
     }
@@ -30,33 +28,15 @@ export class BaseConfigBuilder {
         this.ipMaskEnabled = enabled === true || enabled === 'true';
     }
 
-    setKeywordEmojiRules(rules) {
-        this.keywordEmojiRules = rules;
-        this.emojiCountryMap = buildEmojiCountryMap(rules);
-    }
-
-    // Country detection prefers the user-configured emoji so the group label
-    // reflects the flag the user chose, not the hardcoded one.
-    resolveCountryFromName(name) {
-        if (this.emojiCountryMap) {
-            for (const [emoji, info] of Object.entries(this.emojiCountryMap)) {
-                if (typeof name === 'string' && name.includes(emoji)) return info;
-            }
-        }
-        return parseCountryFromNodeName(name);
-    }
-
     setKeywordDomains(pools) {
         this.keywordDomains = pools;
     }
 
     async build() {
         let customItems = await this.parseCustomItems();
-        // Assign domains while original names still carry keywords, before
-        // replace-mode emoji rules may strip them from the node name.
+        // Assign domains from keyword pools (before any other name changes).
         customItems = applyKeywordDomains(customItems, this.keywordDomains);
         customItems = applyIpMask(customItems, this.ipMaskEnabled);
-        customItems = applyKeywordEmojiRules(customItems, this.keywordEmojiRules);
         this.addCustomItems(customItems);
         this.addSelectors();
         return this.formatConfig();

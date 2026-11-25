@@ -336,8 +336,7 @@ export class SingboxConfigBuilder extends BaseConfigBuilder {
     addCountryGroups() {
         const proxies = this.getProxies();
         const countryGroups = groupProxiesByCountry(proxies, {
-            getName: proxy => this.getProxyName(proxy),
-            resolveCountry: name => this.resolveCountryFromName(name)
+            getName: proxy => this.getProxyName(proxy)
         });
 
         const existingTags = new Set((this.config.outbounds || []).map(o => normalizeGroupName(o?.tag)).filter(Boolean));

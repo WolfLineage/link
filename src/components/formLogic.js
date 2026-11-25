@@ -84,7 +84,6 @@ export const formLogicFn = (t) => {
             selectedPredefinedRule: 'balanced',
             subconverterCopied: false,
             groupByCountry: false,
-            keywordEmoji: '',
             keywordDomains: '',
             ipMask: false,
             includeAutoSelect: true,
@@ -134,7 +133,6 @@ export const formLogicFn = (t) => {
                 this.input = localStorage.getItem('inputTextarea') || '';
                 this.showAdvanced = localStorage.getItem('advancedToggle') === 'true';
                 this.groupByCountry = localStorage.getItem('groupByCountry') === 'true';
-                this.keywordEmoji = localStorage.getItem('keywordEmoji') || '';
                 this.keywordDomains = localStorage.getItem('keywordDomains') || '';
                 this.ipMask = localStorage.getItem('ipMask') === 'true';
                 this.includeAutoSelect = localStorage.getItem('includeAutoSelect') !== 'false';
@@ -179,7 +177,6 @@ export const formLogicFn = (t) => {
                 });
                 this.$watch('showAdvanced', val => localStorage.setItem('advancedToggle', val));
                 this.$watch('groupByCountry', val => localStorage.setItem('groupByCountry', val));
-                this.$watch('keywordEmoji', val => localStorage.setItem('keywordEmoji', val));
                 this.$watch('keywordDomains', val => localStorage.setItem('keywordDomains', val));
                 this.$watch('ipMask', val => localStorage.setItem('ipMask', val));
                 this.$watch('selectedPredefinedRule', val => localStorage.setItem('selectedPredefinedRule', val));
@@ -241,9 +238,6 @@ export const formLogicFn = (t) => {
 
                 if (this.groupByCountry) {
                     params.append('group_by_country', 'true');
-                }
-                if (this.keywordEmoji && this.keywordEmoji.trim()) {
-                    params.append('keywordEmoji', this.keywordEmoji.trim());
                 }
                 if (this.keywordDomains && this.keywordDomains.trim()) {
                     params.append('keywordDomains', this.keywordDomains.trim());
@@ -408,7 +402,6 @@ export const formLogicFn = (t) => {
                     params.append('customRules', JSON.stringify(customRules));
 
                     if (this.groupByCountry) params.append('group_by_country', 'true');
-                    if (this.keywordEmoji && this.keywordEmoji.trim()) params.append('keywordEmoji', this.keywordEmoji.trim());
                     if (this.keywordDomains && this.keywordDomains.trim()) params.append('keywordDomains', this.keywordDomains.trim());
                     if (this.ipMask) params.append('ipMask', 'true');
                     if (!this.includeAutoSelect) params.append('include_auto_select', 'false');
@@ -650,7 +643,6 @@ export const formLogicFn = (t) => {
 
                 // Extract other parameters
                 this.groupByCountry = params.get('group_by_country') === 'true';
-                if (params.has('keywordEmoji')) this.keywordEmoji = params.get('keywordEmoji') || '';
                 if (params.has('keywordDomains')) this.keywordDomains = params.get('keywordDomains') || '';
                 if (params.has('ipMask')) this.ipMask = params.get('ipMask') === 'true';
                 this.includeAutoSelect = params.get('include_auto_select') !== 'false';
