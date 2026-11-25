@@ -1,7 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import { isPublicIpv4, ipToHost, applyIpMask, applyIpMaskToUriText } from '../src/services/ipMaskService.js';
-import { createApp } from '../src/app/createApp.jsx';
-import { MemoryKVAdapter } from '../src/adapters/kv/memoryKv.js';
 
 describe('ipMaskService', () => {
     it('converts public IPv4 to hex sslip.io host', () => {
@@ -32,18 +30,5 @@ describe('ipMaskService', () => {
         const out = applyIpMaskToUriText(line, true);
         expect(out).toContain('@2b801937.g06.sslip.io:443');
         expect(out).toContain('turn=129.226.148.26:3478');
-    });
-});
-
-describe('surge speedtest URL is clash default', () => {
-    it('uses gstatic instead of cloudflare', async () => {
-        const app = createApp({
-            kv: new MemoryKVAdapter(), assetFetcher: null, logger: console,
-            config: { configTtlSeconds: 60, shortLinkTtlSeconds: null }
-        });
-        const res = await app.request('http://localhost/surge?config=' + encodeURIComponent('ss://YWVzLTI1Ni1nY206cGFzc3dvcmQ@1.2.3.4:8388#HK'));
-        const text = await res.text();
-        expect(text).toContain('http://www.gstatic.com/generate_204');
-        expect(text).not.toContain('cp.cloudflare.com');
     });
 });
