@@ -14,6 +14,7 @@ import { encodeBase64, tryDecodeSubscriptionLines } from '../utils.js';
 import { APP_NAME, APP_SUBTITLE } from '../constants.js';
 import { ShortLinkService } from '../services/shortLinkService.js';
 import { ConfigStorageService } from '../services/configStorageService.js';
+import { createSubconverterCompat } from '../services/subconverterCompat.js';
 import { ServiceError, MissingDependencyError } from '../services/errors.js';
 import { normalizeRuntime } from '../runtime/runtimeConfig.js';
 import { PREDEFINED_RULE_SETS, SING_BOX_CONFIG, SING_BOX_CONFIG_V1_11, generateSubconverterConfig } from '../config/index.js';
@@ -259,6 +260,12 @@ export function createApp(bindings = {}) {
             return handleError(c, error, runtime.logger);
         }
     });
+
+    const subconverterCompat = createSubconverterCompat({ app });
+    app.get('/version', subconverterCompat.version);
+    app.options('/version', subconverterCompat.preflight);
+    app.get('/sub', subconverterCompat.sub);
+    app.options('/sub', subconverterCompat.preflight);
 
     app.get('/xray', async (c) => {
         const inputString = c.req.query('config');
