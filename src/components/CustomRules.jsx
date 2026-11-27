@@ -15,6 +15,12 @@ export const CustomRules = (props) => {
                 </h3>
             </div>
 
+            <div class="mb-5 p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 text-sm text-blue-800 dark:text-blue-200 space-y-1.5">
+                <p><strong>这是干嘛的：</strong>给某些网站/域名单独指定走哪条路，比如让「公司内网域名」直连、让「某个游戏服务器」走香港节点。</p>
+                <p><strong>什么时候用：</strong>上面「规则选择」里的现成规则（广告拦截、Google、YouTube 等）不够用，你才有必要加自己的。</p>
+                <p class="text-blue-600 dark:text-blue-300 font-medium">只用现成规则的话，这一块可以完全不管。</p>
+            </div>
+
             <div class="flex flex-col sm:flex-row justify-between items-end sm:items-center mb-6 gap-4">
                 <p class="text-sm text-gray-500 dark:text-gray-400">{t('customRulesSectionTooltip')}</p>
 

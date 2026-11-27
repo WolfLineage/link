@@ -19,8 +19,14 @@ export const CustomGroups = (props) => {
                 </h3>
             </div>
 
+            <div class="mb-5 p-4 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800/50 text-sm text-green-800 dark:text-green-200 space-y-1.5">
+                <p><strong>这是干嘛的：</strong>自己新建一个节点分组，比如「 🎮 游戏专用 」，把指定的几个节点放进去，客户端里就能一键切换使用。</p>
+                <p><strong>什么时候用：</strong>你想把常用节点单独归成一类、方便快速切换的时候。</p>
+                <p class="text-green-600 dark:text-green-300 font-medium">不需要自己建分组的话，这一块可以完全不管。</p>
+            </div>
+
             <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                自己创建分组并指定成员，分组会出现在客户端的节点选择里。成员填节点名/地区组名，用逗号分隔。
+                成员填节点名或地区组名，用逗号分隔。
             </p>
 
             <template x-if="groups.length === 0">

@@ -17,11 +17,14 @@ export const GroupOverrides = (props) => {
     const builtinGroups = [
         ...specialKeys.map(k => ({ name: t(`outboundNames.${k}`), key: k })),
         ...UNIFIED_RULES.map(r => ({ name: t(`outboundNames.${r.name}`), key: r.name })),
-        ...Object.values(COUNTRY_DATA).map(c => ({ name: `${c.emoji} ${c.name}`, key: c.code }))
+        ...Object.entries(COUNTRY_DATA).map(([code, c]) => ({ name: `${c.emoji} ${c.name}`, key: code }))
     ];
 
     return (
-        <div x-data={`groupOverridesData(${JSON.stringify(builtinGroups)})`} class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div x-data="groupOverridesData()" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <script dangerouslySetInnerHTML={{
+                __html: `window.__BUILTIN_GROUPS__ = ${JSON.stringify(builtinGroups)};`
+            }} />
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                     <i class="fas fa-sliders-h text-gray-400"></i>
@@ -29,9 +32,11 @@ export const GroupOverrides = (props) => {
                 </h3>
             </div>
 
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                修改节点选择、广告拦截、地区组等内置分组的成员与顺序。改动会覆盖默认设置。
-            </p>
+            <div class="mb-5 p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/50 text-sm text-amber-800 dark:text-amber-200 space-y-1.5">
+                <p><strong>这是干嘛的：</strong>改动系统自带的分组——比如调整「 🚀 节点选择 」里节点的先后顺序、把某个节点从「 🛑 广告拦截 」分组里去掉、或把一个分组类型改成自动测速。</p>
+                <p><strong>什么时候用：</strong>你想改变现有分组的成员或顺序，但又不想新建分组的时候。</p>
+                <p class="text-amber-600 dark:text-amber-300 font-medium">默认分组已经够用的话，这一块可以完全不管。</p>
+            </div>
 
             <div class="flex flex-wrap gap-2 mb-4">
                 <select x-model="selectedGroup" class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm flex-1 min-w-[200px]">
@@ -93,9 +98,9 @@ export const GroupOverrides = (props) => {
 
             <script dangerouslySetInnerHTML={{
                 __html: `
-        function groupOverridesData(builtinGroups) {
+        function groupOverridesData() {
           return {
-            builtinGroups: builtinGroups || [],
+            builtinGroups: window.__BUILTIN_GROUPS__ || [],
             selectedGroup: '',
             overrides: [],
             init() {
