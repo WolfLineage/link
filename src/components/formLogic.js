@@ -232,6 +232,12 @@ export const formLogicFn = (t) => {
                     const customRules = customRulesInput && customRulesInput.value ? JSON.parse(customRulesInput.value) : [];
                     if (Array.isArray(customRules) && customRules.length > 0) {
                         params.append('customRules', JSON.stringify(customRules));
+                    params.append('customGroups', JSON.stringify(customGroups));
+                    }
+                    const customGroupsInput = document.querySelector('input[name="customGroups"]');
+                    const customGroups = customGroupsInput && customGroupsInput.value ? JSON.parse(customGroupsInput.value) : [];
+                    if (Array.isArray(customGroups) && customGroups.length > 0) {
+                        params.append('customGroups', JSON.stringify(customGroups));
                     }
                 } catch { }
 
@@ -398,6 +404,8 @@ export const formLogicFn = (t) => {
                     // Get custom rules from the child component via the hidden input
                     const customRulesInput = document.querySelector('input[name="customRules"]');
                     const customRules = customRulesInput && customRulesInput.value ? JSON.parse(customRulesInput.value) : [];
+                    const customGroupsInput = document.querySelector('input[name="customGroups"]');
+                    const customGroups = customGroupsInput && customGroupsInput.value ? JSON.parse(customGroupsInput.value) : [];
 
                     // Construct URLs
                     const origin = window.location.origin;
@@ -406,6 +414,7 @@ export const formLogicFn = (t) => {
                     params.append('ua', this.customUA);
                     params.append('selectedRules', JSON.stringify(this.selectedRules));
                     params.append('customRules', JSON.stringify(customRules));
+                    params.append('customGroups', JSON.stringify(customGroups));
 
                     if (this.groupByCountry) params.append('group_by_country', 'true');
                     if (this.keywordDomains && this.keywordDomains.trim()) params.append('keywordDomains', this.keywordDomains.trim());
@@ -629,6 +638,21 @@ export const formLogicFn = (t) => {
                         }
                     } catch (e) {
                         console.warn('Failed to parse selectedRules:', e);
+                    }
+                }
+
+                // Extract customGroups
+                const customGroups = params.get('customGroups');
+                if (customGroups) {
+                    try {
+                        const parsed = JSON.parse(customGroups);
+                        if (Array.isArray(parsed) && parsed.length > 0) {
+                            window.dispatchEvent(new CustomEvent('restore-custom-groups', {
+                                detail: { groups: parsed }
+                            }));
+                        }
+                    } catch (e) {
+                        console.warn('Failed to parse customGroups:', e);
                     }
                 }
 

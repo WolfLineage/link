@@ -48,7 +48,7 @@ function readRuleParams(config) {
     try {
         const url = new URL(config);
         const result = {};
-        for (const key of ['selectedRules', 'customRules', 'group_by_country', 'include_auto_select', 'lang', 'keywordEmoji', 'keywordDomains', 'ipMask']) {
+        for (const key of ['selectedRules', 'customRules', 'group_by_country', 'include_auto_select', 'lang', 'keywordEmoji', 'keywordDomains', 'ipMask', 'customGroups']) {
             const value = url.searchParams.get(key);
             if (value !== null) result[key] = value;
         }
@@ -86,8 +86,16 @@ export function createSubconverterCompat({ app }) {
         const internalUrl = new URL(`/${route}`, c.req.url);
         internalUrl.searchParams.set('config', input);
 
-        for (const [key, value] of Object.entries(readRuleParams(c.req.query('config')))) {
+        const configParams = readRuleParams(c.req.query('config'));
+        for (const [key, value] of Object.entries(configParams)) {
             internalUrl.searchParams.set(key, value);
+        }
+        // Rule params may also arrive on the /sub request itself (EDT panels).
+        // Config-URL values take precedence; fall back to the direct query.
+        for (const key of ['selectedRules', 'customRules', 'group_by_country', 'include_auto_select', 'customGroups']) {
+            if (configParams[key] !== undefined) continue;
+            const value = c.req.query(key);
+            if (value) internalUrl.searchParams.set(key, value);
         }
 
         const keywordEmoji = c.req.query('keywordEmoji');
@@ -96,6 +104,8 @@ export function createSubconverterCompat({ app }) {
         if (keywordDomains) internalUrl.searchParams.set('keywordDomains', keywordDomains);
         const ipMask = c.req.query('ipMask');
         if (ipMask) internalUrl.searchParams.set('ipMask', ipMask);
+        const customGroups = c.req.query('customGroups');
+        if (customGroups) internalUrl.searchParams.set('customGroups', customGroups);
         const groupByCountry = c.req.query('group_by_country');
         if (groupByCountry) internalUrl.searchParams.set('group_by_country', groupByCountry);
 

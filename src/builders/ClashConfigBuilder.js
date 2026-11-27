@@ -1,5 +1,5 @@
 import yaml from 'js-yaml';
-import { CLASH_CONFIG, generateRules, generateClashRuleSets, getOutbounds, PREDEFINED_RULE_SETS, DIRECT_DEFAULT_RULES, REJECT_ACTION_RULES } from '../config/index.js';
+import { CLASH_CONFIG, generateRules, generateClashRuleSets, getOutbounds, PREDEFINED_RULE_SETS, DIRECT_DEFAULT_RULES } from '../config/index.js';
 import { BaseConfigBuilder } from './BaseConfigBuilder.js';
 import { deepCopy, groupProxiesByCountry, buildCountryNameFilter } from '../utils.js';
 import { addProxyWithDedup } from './helpers/proxyHelpers.js';
@@ -410,8 +410,6 @@ export class ClashConfigBuilder extends BaseConfigBuilder {
 
     addOutboundGroups(outbounds, proxyList) {
         outbounds.forEach(outbound => {
-            // Rejected rules go straight to REJECT; no selectable group needed.
-            if (REJECT_ACTION_RULES.has(outbound)) return;
             if (outbound !== this.t('outboundNames.Node Select')) {
                 const name = this.t(`outboundNames.${outbound}`);
                 if (!this.hasProxyGroup(name)) {
@@ -576,6 +574,30 @@ export class ClashConfigBuilder extends BaseConfigBuilder {
      * Handles same-name groups by merging proxies/use fields and preserving user settings
      * @param {Array} userGroups - User-defined proxy groups from input config
      */
+    addCustomGroups() {
+        if (!Array.isArray(this.customGroups) || this.customGroups.length === 0) return;
+
+        const proxyList = this.getProxyList();
+        const validRefs = new Set(['DIRECT', 'REJECT']);
+        proxyList.forEach(n => validRefs.add(n));
+        (this.config['proxy-groups'] || []).forEach(g => {
+            if (g?.name) validRefs.add(g.name);
+        });
+
+        this.customGroups.forEach(group => {
+            if (!group?.name || this.hasProxyGroup(group.name)) return;
+            const members = group.members.filter(m => validRefs.has(m));
+            if (members.length === 0) return;
+            const built = { name: group.name, type: group.type, proxies: members };
+            if (group.type === 'url-test' || group.type === 'fallback') {
+                built.url = 'https://www.gstatic.com/generate_204';
+                built.interval = 300;
+            }
+            this.config['proxy-groups'].push(built);
+            validRefs.add(group.name);
+        });
+    }
+
     mergeUserProxyGroups(userGroups) {
         if (!Array.isArray(userGroups)) return;
 

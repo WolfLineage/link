@@ -402,6 +402,35 @@ export class SingboxConfigBuilder extends BaseConfigBuilder {
      * Handles same-tag groups by merging outbound references
      * @param {Array} userGroups - User-defined proxy groups from input config (converted to Clash format)
      */
+    addCustomGroups() {
+        if (!Array.isArray(this.customGroups) || this.customGroups.length === 0) return;
+
+        const proxyList = this.getProxyList();
+        const validRefs = new Set(['DIRECT', 'direct']);
+        proxyList.forEach(n => validRefs.add(n));
+        (this.config.outbounds || []).forEach(o => {
+            if (o?.tag) validRefs.add(o.tag);
+        });
+
+        this.customGroups.forEach(group => {
+            if (!group?.name) return;
+            if ((this.config.outbounds || []).some(o => o?.tag === group.name)) return;
+            const members = group.members.filter(m => validRefs.has(m));
+            if (members.length === 0) return;
+            const built = {
+                type: group.type === 'url-test' ? 'urltest' : group.type === 'fallback' ? 'urltest' : 'selector',
+                tag: group.name,
+                outbounds: members
+            };
+            if (built.type === 'urltest') {
+                built.url = 'https://www.gstatic.com/generate_204';
+                built.interval = '5m';
+            }
+            this.config.outbounds.push(built);
+            validRefs.add(group.name);
+        });
+    }
+
     mergeUserProxyGroups(userGroups) {
         if (!Array.isArray(userGroups)) return;
 

@@ -1,6 +1,6 @@
 import { BaseConfigBuilder } from './BaseConfigBuilder.js';
 import { groupProxiesByCountry } from '../utils.js';
-import { SURGE_CONFIG, SURGE_SITE_RULE_SET_BASEURL, SURGE_IP_RULE_SET_BASEURL, generateRules, getOutbounds, PREDEFINED_RULE_SETS, DIRECT_DEFAULT_RULES, REJECT_ACTION_RULES } from '../config/index.js';
+import { SURGE_CONFIG, SURGE_SITE_RULE_SET_BASEURL, SURGE_IP_RULE_SET_BASEURL, generateRules, getOutbounds, PREDEFINED_RULE_SETS, DIRECT_DEFAULT_RULES } from '../config/index.js';
 import { addProxyWithDedup } from './helpers/proxyHelpers.js';
 import { buildSelectorMembers, buildNodeSelectMembers, buildCustomRuleMembers, uniqueNames } from './helpers/groupBuilder.js';
 
@@ -276,8 +276,6 @@ export class SurgeConfigBuilder extends BaseConfigBuilder {
 
     addOutboundGroups(outbounds, proxyList) {
         outbounds.forEach(outbound => {
-            // Rejected rules go straight to REJECT; no selectable group needed.
-            if (REJECT_ACTION_RULES.has(outbound)) return;
             if (outbound !== this.t('outboundNames.Node Select')) {
                 let options = this.buildAggregatedOptions(proxyList);
                 const name = this.t(`outboundNames.${outbound}`);
@@ -310,6 +308,31 @@ export class SurgeConfigBuilder extends BaseConfigBuilder {
                 );
             });
         }
+    }
+
+    addCustomGroups() {
+        if (!Array.isArray(this.customGroups) || this.customGroups.length === 0) return;
+
+        const proxyList = this.getProxyList();
+        const validRefs = new Set(['DIRECT', 'REJECT']);
+        proxyList.forEach(n => validRefs.add(n));
+        (this.config['proxy-groups'] || []).forEach(line => {
+            const name = String(line || '').split(' = ')[0].trim();
+            if (name) validRefs.add(name);
+        });
+
+        this.customGroups.forEach(group => {
+            if (!group?.name || this.hasProxyGroup(group.name)) return;
+            const members = group.members.filter(m => validRefs.has(m));
+            if (members.length === 0) return;
+            const surgeType = group.type === 'select' ? 'select' : 'url-test';
+            let extra = '';
+            if (surgeType === 'url-test') extra = ', url=https://www.gstatic.com/generate_204, interval=300';
+            this.config['proxy-groups'].push(
+                this.createProxyGroup(group.name, surgeType, members, extra)
+            );
+            validRefs.add(group.name);
+        });
     }
 
     addFallBackGroup(proxyList) {
@@ -382,9 +405,6 @@ export class SurgeConfigBuilder extends BaseConfigBuilder {
         }
 
         const rules = generateRules(this.selectedRules, this.customRules);
-        const ruleTarget = (outbound) => outbound === 'REJECT'
-            ? 'REJECT'
-            : this.t('outboundNames.' + outbound);
         let finalConfig = [];
 
         if (this.subscriptionUrl) {
@@ -441,9 +461,9 @@ export class SurgeConfigBuilder extends BaseConfigBuilder {
 
                 // Surge supports SRC-IP (single IP). Best-effort: downgrade /32 CIDR to SRC-IP.
                 if (typeof safeValue === 'string' && safeValue.endsWith('/32')) {
-                    finalConfig.push(`SRC-IP,${safeValue.slice(0, -3)},${ruleTarget(rule.outbound)}`);
+                    finalConfig.push(`SRC-IP,${safeValue.slice(0, -3)},${this.t('outboundNames.' + rule.outbound)}`);
                 } else if (typeof safeValue === 'string' && !safeValue.includes('/')) {
-                    finalConfig.push(`SRC-IP,${safeValue},${ruleTarget(rule.outbound)}`);
+                    finalConfig.push(`SRC-IP,${safeValue},${this.t('outboundNames.' + rule.outbound)}`);
                 } else if (typeof safeValue === 'string' && safeValue.includes('/')) {
                     finalConfig.push(`# SRC-IP-CIDR not supported by Surge, skipped: ${safeValue}`);
                 }
@@ -452,31 +472,31 @@ export class SurgeConfigBuilder extends BaseConfigBuilder {
 
         rules.filter(rule => !!rule.domain_suffix).map(rule => {
             rule.domain_suffix.forEach(suffix => {
-                finalConfig.push(`DOMAIN-SUFFIX,${suffix},${ruleTarget(rule.outbound)}`);
+                finalConfig.push(`DOMAIN-SUFFIX,${suffix},${this.t('outboundNames.' + rule.outbound)}`);
             });
         });
 
         rules.filter(rule => !!rule.domain_keyword).map(rule => {
             rule.domain_keyword.forEach(keyword => {
-                finalConfig.push(`DOMAIN-KEYWORD,${keyword},${ruleTarget(rule.outbound)}`);
+                finalConfig.push(`DOMAIN-KEYWORD,${keyword},${this.t('outboundNames.' + rule.outbound)}`);
             });
         });
 
         rules.filter(rule => rule.site_rules[0] !== '').map(rule => {
             rule.site_rules.forEach(site => {
-                finalConfig.push(`RULE-SET,${SURGE_SITE_RULE_SET_BASEURL}${site}.conf,${ruleTarget(rule.outbound)}`);
+                finalConfig.push(`RULE-SET,${SURGE_SITE_RULE_SET_BASEURL}${site}.conf,${this.t('outboundNames.' + rule.outbound)}`);
             });
         });
 
         rules.filter(rule => rule.ip_rules[0] !== '').map(rule => {
             rule.ip_rules.forEach(ip => {
-                finalConfig.push(`RULE-SET,${SURGE_IP_RULE_SET_BASEURL}${ip}.txt,${ruleTarget(rule.outbound)},no-resolve`);
+                finalConfig.push(`RULE-SET,${SURGE_IP_RULE_SET_BASEURL}${ip}.txt,${this.t('outboundNames.' + rule.outbound)},no-resolve`);
             });
         });
 
         rules.filter(rule => !!rule.ip_cidr).map(rule => {
             rule.ip_cidr.forEach(cidr => {
-                finalConfig.push(`IP-CIDR,${cidr},${ruleTarget(rule.outbound)},no-resolve`);
+                finalConfig.push(`IP-CIDR,${cidr},${this.t('outboundNames.' + rule.outbound)},no-resolve`);
             });
         });
 

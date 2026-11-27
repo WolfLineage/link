@@ -102,15 +102,9 @@ export const UNIFIED_RULES = [
 export const DIRECT_DEFAULT_RULES = new Set(['Private', 'Location:CN']);
 export const REJECT_ACTION_RULES = new Set(['Ad Block']);
 
-// Resolve a rule's outbound to its final target. REJECT-class rules bypass the
-// selectable proxy group entirely so ads are dropped directly in the client.
-export function resolveOutbound(outbound) {
-	return REJECT_ACTION_RULES.has(outbound) ? 'REJECT' : outbound;
-}
-
 export const PREDEFINED_RULE_SETS = {
-	minimal: ['Ad Block', 'Location:CN', 'Private', 'Non-China'],
-	balanced: ['Ad Block', 'Location:CN', 'Private', 'Non-China', 'Github', 'Google', 'Youtube', 'AI Services', 'Telegram'],
+	minimal: ['Location:CN', 'Private', 'Non-China'],
+	balanced: ['Location:CN', 'Private', 'Non-China', 'Github', 'Google', 'Youtube', 'AI Services', 'Telegram'],
 	comprehensive: UNIFIED_RULES.map(rule => rule.name)
 };
 

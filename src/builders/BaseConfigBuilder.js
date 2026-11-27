@@ -24,6 +24,11 @@ export class BaseConfigBuilder {
         this.keywordDomains = null;
         this.keywordEmojiRules = null;
         this.ipMaskEnabled = false;
+        this.customGroups = [];
+    }
+
+    setCustomGroups(groups) {
+        this.customGroups = Array.isArray(groups) ? groups : [];
     }
 
     setIpMask(enabled) {
@@ -439,10 +444,18 @@ export class BaseConfigBuilder {
         this.addCustomRuleGroups(proxyList);
         this.addFallBackGroup(proxyList);
 
-        // Merge user-defined proxy-groups after system groups are created
+        // Add form-defined custom groups, then merge groups from upstream config.
+        this.addCustomGroups();
         if (this.pendingUserProxyGroups && this.pendingUserProxyGroups.length > 0) {
             this.mergeUserProxyGroups(this.pendingUserProxyGroups);
         }
+    }
+
+    /**
+     * Add form-defined custom proxy groups. Override in child classes.
+     */
+    addCustomGroups() {
+        // Default: no-op. Child classes implement format-specific creation.
     }
 
     /**
