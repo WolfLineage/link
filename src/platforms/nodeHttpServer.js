@@ -16,7 +16,7 @@ export function startNodeHttpServer(app, { port = 8787, logger = console } = {})
     });
 
     server.listen(port, () => {
-        logger.info?.(`Sublink worker running on http://0.0.0.0:${port}`);
+        logger.info?.(`Subconverter For CF running on http://0.0.0.0:${port}`);
     });
 
     return server;

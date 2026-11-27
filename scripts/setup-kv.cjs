@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 
 const KV_NAMESPACE = 'SUBLINK_KV';
-const WORKER_NAME = 'sublink-worker'
+const WORKER_NAME = 'link'
 const KV_NAMESPACE_NAME = `${WORKER_NAME}-${KV_NAMESPACE}`;
 const LEGACY_KV_NAMESPACE_NAME = `${WORKER_NAME}-${WORKER_NAME}-${KV_NAMESPACE}`;  // 历史遗留的命名空间名称
 const FALLBACK_KV_NAMESPACE_NAME = KV_NAMESPACE; // 早期账号里只叫 SUBLINK_KV
@@ -142,6 +142,9 @@ function updateWranglerConfig(kvNamespaceId) {
   try {
     let config = fs.readFileSync(WRANGLER_CONFIG_PATH, 'utf8');
     
+    // Remove the commented-out KV example block from the default template.
+    config = config.replace(/# KV is optional[\s\S]*?# \]\n/, '');
+
     // 使用正则表达式查找并替换KV namespace ID
     const kvConfigRegex = /kv_namespaces\s*=\s*\[\s*{\s*binding\s*=\s*"SUBLINK_KV"\s*,\s*id\s*=\s*"([^"]*)"\s*}\s*\]/;
     

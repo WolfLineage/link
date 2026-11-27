@@ -25,7 +25,7 @@ const CORS_HEADERS = {
     'Access-Control-Allow-Headers': '*'
 };
 
-export const SUBCONVERTER_VERSION = 'subconverter v2.1.0 backend';
+export const SUBCONVERTER_VERSION = 'subconverter v2.6.0 (Subconverter For CF)';
 
 export function resolveTargetRoute(target) {
     const key = String(target || 'clash').split('&')[0].trim().toLowerCase();

@@ -13,11 +13,11 @@ export const Footer = () => {
                         <span class="text-sm">© {currentYear} {APP_NAME}. All rights reserved.</span>
                         <span class="hidden md:inline text-gray-300 dark:text-gray-700">|</span>
                         <a
-                            href={`${GITHUB_REPO}/releases/tag/v${APP_VERSION}`}
+                            href={`${GITHUB_REPO}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             class="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-mono"
-                            title={`View release notes for v${APP_VERSION}`}
+                            title={`Subconverter For CF v${APP_VERSION}`}
                         >
                             v{APP_VERSION}
                         </a>

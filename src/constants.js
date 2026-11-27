@@ -1,12 +1,12 @@
 // Application constants
-export const APP_NAME = 'Sublink Worker';
-export const APP_VERSION = '2.5.0';
-export const GITHUB_REPO = 'https://github.com/7Sageer/sublink-worker';
-export const GITHUB_API_RELEASES = 'https://api.github.com/repos/7Sageer/sublink-worker/releases/latest';
-export const DOCS_URL = 'https://sublink.works';
+export const APP_NAME = 'Subconverter For CF';
+export const APP_VERSION = '2.6.0';
+export const GITHUB_REPO = 'https://github.com/WolfLineage/link';
+export const GITHUB_API_RELEASES = 'https://api.github.com/repos/WolfLineage/link/releases/latest';
+export const DOCS_URL = 'https://github.com/WolfLineage/link';
 
 // SEO and metadata
-export const APP_KEYWORDS = 'clash, singbox, surge, subscription, converter, sublink';
+export const APP_KEYWORDS = 'clash, singbox, surge, subscription, converter, subconverter, cloudflare';
 
 // Subtitles for different languages
 export const APP_SUBTITLE = {

@@ -153,13 +153,13 @@ export const Layout = (props) => {
               async checkForUpdates() {
                 try {
                   // Check if user dismissed this version before
-                  const dismissedVersion = localStorage.getItem('sublink_dismissed_version');
-                  const lastCheck = localStorage.getItem('sublink_last_version_check');
+                  const dismissedVersion = localStorage.getItem('scf_dismissed_version');
+                  const lastCheck = localStorage.getItem('scf_last_version_check');
                   const now = Date.now();
                   
                   // Only check once per hour to avoid rate limiting
                   if (lastCheck && (now - parseInt(lastCheck)) < 3600000) {
-                    const cachedVersion = localStorage.getItem('sublink_latest_version');
+                    const cachedVersion = localStorage.getItem('scf_latest_version');
                     if (cachedVersion && cachedVersion !== dismissedVersion && this.compareVersions(cachedVersion, this.currentVersion) > 0) {
                       this.latestVersion = cachedVersion;
                       this.showUpdateToast = true;
@@ -177,8 +177,8 @@ export const Layout = (props) => {
                   const latestVersion = (data.tag_name || '').replace(/^v/, '');
                   
                   // Cache the result
-                  localStorage.setItem('sublink_latest_version', latestVersion);
-                  localStorage.setItem('sublink_last_version_check', now.toString());
+                  localStorage.setItem('scf_latest_version', latestVersion);
+                  localStorage.setItem('scf_last_version_check', now.toString());
                   
                   // Compare versions
                   if (latestVersion && latestVersion !== dismissedVersion && this.compareVersions(latestVersion, this.currentVersion) > 0) {
@@ -202,7 +202,7 @@ export const Layout = (props) => {
               },
               dismissUpdate() {
                 this.showUpdateToast = false;
-                localStorage.setItem('sublink_dismissed_version', this.latestVersion);
+                localStorage.setItem('scf_dismissed_version', this.latestVersion);
               }
             }
           }
