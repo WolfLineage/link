@@ -2,136 +2,109 @@
   <img src="public/favicon.png" alt="Subconverter For CF" width="120" height="120"/>
 
   <h1><b>Subconverter For CF</b></h1>
-  <p><b>一个订阅转换工具：把各种订阅链接转换成 Clash / Sing-Box / Surge / Xray 等客户端能用的格式。</b></p>
-  <p>可部署在 Cloudflare Workers、Vercel、Node.js 或 Docker。这是 sublink-worker 的独立分支。</p>
+  <h5><i>One Worker, All Subscriptions</i></h5>
+
+  <p><b>一个轻量级订阅转换与管理工具：把各种代理协议的订阅链接，转换成 Clash、Sing-Box、Xray、Surge 等客户端可直接使用的配置。</b></p>
+  <p>可部署在 Cloudflare Workers、Vercel、Node.js 或 Docker。</p>
 
   <p>
     <a href="https://deploy.workers.cloudflare.com/?url=https://github.com/WolfLineage/link">
-      <img src="https://deploy.workers.cloudflare.com/button" alt="一键部署到 Cloudflare Workers" style="height: 40px;"/>
+      <img src="https://deploy.workers.cloudflare.com/button" alt="Deploy to Cloudflare Workers" style="height: 36px;"/>
     </a>
   </p>
 </div>
 
 ---
 
-## 一、这是什么（新手先看这里）
+## 快速开始
 
-简单说：**它是一个"订阅格式转换器"**。
+### 一键部署（推荐）
 
-你手上有订阅链接，但客户端（Clash、Sing-Box 等）不认，或者你想自定义规则（广告拦截、地区分组、节点改名等）。把这个工具部署好，把订阅链接填进去，它就能生成客户端可以直接导入的新链接。
+点击页面上方的 **Deploy to Cloudflare Workers** 按钮，登录 GitHub 账号后点「Deploy」，等待 1–2 分钟即可。部署完成后会得到一个 `https://xxx.workers.dev` 的网址，打开即可使用，无需服务器、无需懂代码。
 
-**它能做什么：**
-- 转换格式：Clash、Sing-Box、Surge、Xray 等
-- 内置规则：广告拦截、国内直连、Google / YouTube 等常用分流
-- 自定义节点名：按关键词加旗帜 emoji、替换文字
-- 自定义分组：自己建节点分组、调整内置分组的成员和顺序
-- 保存配置：多套预设自动保存，一键切换
-- 生成短链接（可选，需要配置 KV）
+> 默认不启用短链接（KV 可选），不影响核心转换功能。开启方法见下方「常见问题」。
 
----
+### 其他部署方式
 
-## 二、最简单的部署方法（推荐小白）
+- **Node.js**：`npm install && npm run dev:node`，访问 `http://localhost:8787`
+- **Docker Compose**：`docker compose up -d`（含 Redis），访问 `http://服务器IP:8787`
+- **Docker**：`docker build -t subconverter-for-cf . && docker run -p 8787:8787 subconverter-for-cf`
+- **Vercel**：`vercel deploy`（KV 需在项目中另行配置）
 
-### 方法一：Cloudflare Workers 一键部署
+### 使用步骤
 
-1. 点上面的 **「Deploy to Cloudflare Workers」** 按钮
-2. 用你的 GitHub 账号登录（没有就先注册）
-3. 点击 **「Deploy」/「部署」**，等待 1-2 分钟
-4. 部署完成后，会给你一个类似 `https://xxx.workers.dev` 的网址——这就是你的工具地址，打开就能用
-
-**不需要懂代码，不需要买服务器，Cloudflare 免费额度足够个人使用。**
-
-> 说明：默认不启用短链接功能，但这不影响核心转换功能。想开短链接请看下面的「进阶」。
-
-### 方法二：Docker 部署（有服务器的话）
-
-```bash
-git clone https://github.com/WolfLineage/link.git
-cd link
-docker compose up -d
-```
-
-然后访问 `http://你的服务器IP:8787`。
-
-### 方法三：Node.js 本地运行
-
-```bash
-npm install
-npm run dev:node
-```
-
-然后访问 `http://localhost:8787`。
+1. 打开部署好的网址，把订阅链接粘贴到输入框
+2. （可选）展开「高级选项」设置规则、旗帜、分组等
+3. 点击「转换」，生成对应客户端的链接
+4. 复制所需客户端的链接，导入客户端即可
 
 ---
 
-## 三、怎么用（部署完成后）
+## 功能特性
 
-1. 打开你的工具网址（比如 `https://xxx.workers.dev`）
-2. 把订阅链接粘贴到最上面的输入框
-3. （可选）展开「高级选项」，勾选规则、设置旗帜、编辑分组
-4. 点「转换」，会生成几个客户端链接
-5. 复制对应客户端的链接，导入到 Clash / Sing-Box 等客户端即可
+### 支持的协议
 
-**给小白的建议**：刚开始只用默认设置就行。高级选项里那一堆「自定义规则 / 自定义代理组 / 编辑内置分组」都可以先不管，用熟练了再研究。
+ShadowSocks • VMess • VLESS • Hysteria2 • Trojan • TUIC • AnyTLS
 
----
+### 支持的客户端
 
-## 四、进阶：开启短链接（可选）
+Sing-Box（含 1.11 / 1.12 / 1.14 多版本适配）• Clash / Clash.Meta (Mihomo) • Xray / V2Ray • Surge
 
-短链接能把很长的订阅链接缩短成 `https://你的域名/短码`。不开也能正常用。
+### 支持的输入
 
-开启方法：
-1. 登录 Cloudflare Dashboard → 存储和数据库 → KV → 创建一个命名空间（名字随意，比如 `link-kv`）
-2. 复制创建后显示的 **Namespace ID**
-3. 在项目里打开 `wrangler.toml`，取消下面几行的注释，把 ID 换成你自己的：
+- Base64 编码订阅
+- HTTP/HTTPS 订阅链接
+- 完整配置（Sing-Box JSON、Clash YAML、Surge INI）
+- 通过 `/sub`、`/subconverter` 等兼容端点对接 EDT 等面板
 
-```toml
-kv_namespaces = [
-  { binding = "SUBLINK_KV", id = "你的Namespace ID" }
-]
-```
+### 规则与分流
 
-4. 重新部署一次即可。
+- **内置规则集**：最小化 / 平衡 / 全面三档预设，涵盖广告拦截、国内直连、Google、YouTube、GitHub、AI 服务等常用分流
+- **广告拦截**：作为可见分组呈现，默认选中可用节点，规则直接指向该分组
+- **IPv6 默认关闭**：DNS 与全局均默认关闭 IPv6，并可强制覆盖用户配置中的 IPv6 开启项
+- **自定义规则**：按域名、域名关键词、IP、IP CIDR、Site 规则等条件，把指定流量导向指定出口
+- **自定义代理组**：自由创建分组并指定成员，支持手动选择、自动测速择优、故障转移三种类型
+- **编辑内置分组**：修改节点选择、广告拦截、地区组等内置分组的成员、顺序、类型与测速参数，也可禁用某个分组
+- **地区分组**：按节点国家自动分组，分组旗帜可跟随用户为关键词设定的 emoji（未设定的地区用默认旗帜）
+- **节点改名**：按关键词对节点名添加 emoji 或替换关键词（add / replace 两种模式）
+- **关键词域名池**：按关键词把域名分配给不同节点组，支持随机分配
+- **IP 隐藏**：把订阅中的节点 IP 替换为域名，保护真实 IP
 
----
+### 配置与使用体验
 
-## 五、常见问题
-
-**Q：一键部署报错怎么办？**
-A：绝大多数是网络问题，重试一次即可。如果反复失败，确认你已登录 GitHub 且账号正常。
-
-**Q：部署后打开网址是空白/报错？**
-A：等 1-2 分钟再刷新（首次部署需要初始化）。仍不行就在 Cloudflare Workers 页面看日志。
-
-**Q：转换出来的链接客户端导入失败？**
-A：确认选对了客户端类型（Clash 用 Clash 链接，Sing-Box 用 Sing-Box 链接）。
-
-**Q：广告拦截没生效？**
-A：在「规则选择」里勾选「广告拦截」，然后重新转换、更新订阅。
-
-**Q：怎么更新到最新版？**
-A：如果是 Cloudflare 一键部署的，重新点一次部署按钮即可。
+- **多预设自动保存**：可建立多套配置预设，任何改动实时保存，下拉切换即恢复整套设置
+- **保存的配置**：可把当前配置保存到服务端（KV 或 Redis），通过短码访问
+- **短链接**：支持固定短码与随机短码（需配置 KV）
+- **亮色 / 暗色主题**
+- **多语言**：中文、英文、波斯语、俄语
+- **灵活的 API**：`/clash`、`/singbox`、`/surge`、`/xray`、`/sub`、`/subconverter`、`/version` 等端点，便于脚本自动化
 
 ---
 
-## 六、支持的协议和客户端
+## 常见问题
 
-- **协议**：ShadowSocks、VMess、VLESS、Hysteria2、Trojan、TUIC
-- **客户端**：Sing-Box、Clash、Xray / V2Ray、Surge
-- **输入**：Base64 订阅、HTTP/HTTPS 订阅、完整配置（Sing-Box JSON、Clash YAML、Surge INI）
+**一键部署报错？** 多为网络问题，重试即可；确认已登录 GitHub 且账号正常。
+
+**部署后打开是空白？** 首次部署需 1–2 分钟初始化，稍后刷新；仍不行可在 Cloudflare Workers 页面查看日志。
+
+**短链接怎么用？** 在 Cloudflare Dashboard 创建一个 KV 命名空间，取消 `wrangler.toml` 中 `kv_namespaces` 段的注释并填入你的 Namespace ID，重新部署即可。核心转换功能不依赖 KV。
+
+**广告拦截没生效？** 在「规则选择」中勾选「广告拦截」，重新转换并更新订阅。
+
+**如何更新？** 一键部署的用户重新点击部署按钮即可。
 
 ---
 
-## 七、关于这个项目
+## 许可证
 
-这是 [sublink-worker](https://github.com/7Sageer/sublink-worker) 的独立分支，由 [WolfLineage](https://github.com/WolfLineage) 维护。
+本项目采用 MIT 许可证，详见 [LICENSE](LICENSE)。
 
-当前版本：**v2.6.0**
-
-## 八、许可证
-
-本项目采用 MIT 许可证，详见 [LICENSE](LICENSE) 文件。
-
-## 九、免责声明
+## 免责声明
 
 本项目仅用于学习和交流，请勿用于非法用途。使用本项目产生的一切后果由使用者自行承担，与开发者无关。
+
+---
+
+## 鸣谢与出处
+
+本项目源自 [7Sageer/sublink-worker](https://github.com/7Sageer/sublink-worker)，在其基础上进行了独立演化与功能扩展。感谢原项目作者的开源贡献。
