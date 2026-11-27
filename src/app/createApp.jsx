@@ -19,6 +19,7 @@ import { parseKeywordDomains } from '../services/keywordDomainService.js';
 import { parseKeywordEmojiRules } from '../services/keywordEmojiService.js';
 import { applyIpMaskToUriText } from '../services/ipMaskService.js';
 import { parseCustomGroups } from '../services/customGroupService.js';
+import { parseGroupOverrides } from '../services/groupOverrideService.js';
 import { ServiceError, MissingDependencyError } from '../services/errors.js';
 import { normalizeRuntime } from '../runtime/runtimeConfig.js';
 import { PREDEFINED_RULE_SETS, SING_BOX_CONFIG, SING_BOX_CONFIG_V1_11, generateSubconverterConfig } from '../config/index.js';
@@ -121,6 +122,7 @@ export function createApp(bindings = {}) {
             builder.setKeywordDomains(parseKeywordDomains(c.req.query('keywordDomains')));
             builder.setKeywordEmojiRules(parseKeywordEmojiRules(c.req.query('keywordEmoji')));
             builder.setCustomGroups(parseCustomGroups(c.req.query('customGroups')));
+            builder.setGroupOverrides(parseGroupOverrides(c.req.query('groupOverrides')));
             builder.setIpMask(c.req.query('ipMask'));
             await builder.build();
             const userinfo = builder.getSubscriptionUserinfo();
@@ -173,6 +175,7 @@ export function createApp(bindings = {}) {
             builder.setKeywordDomains(parseKeywordDomains(c.req.query('keywordDomains')));
             builder.setKeywordEmojiRules(parseKeywordEmojiRules(c.req.query('keywordEmoji')));
             builder.setCustomGroups(parseCustomGroups(c.req.query('customGroups')));
+            builder.setGroupOverrides(parseGroupOverrides(c.req.query('groupOverrides')));
             builder.setIpMask(c.req.query('ipMask'));
             await builder.build();
             const userinfo = builder.getSubscriptionUserinfo();
@@ -220,6 +223,7 @@ export function createApp(bindings = {}) {
             builder.setKeywordDomains(parseKeywordDomains(c.req.query('keywordDomains')));
             builder.setKeywordEmojiRules(parseKeywordEmojiRules(c.req.query('keywordEmoji')));
             builder.setCustomGroups(parseCustomGroups(c.req.query('customGroups')));
+            builder.setGroupOverrides(parseGroupOverrides(c.req.query('groupOverrides')));
             builder.setIpMask(c.req.query('ipMask'));
             builder.setSubscriptionUrl(c.req.url);
             await builder.build();

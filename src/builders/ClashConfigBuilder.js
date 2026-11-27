@@ -574,6 +574,31 @@ export class ClashConfigBuilder extends BaseConfigBuilder {
      * Handles same-name groups by merging proxies/use fields and preserving user settings
      * @param {Array} userGroups - User-defined proxy groups from input config
      */
+    applyGroupOverrides() {
+        if (!Array.isArray(this.groupOverrides) || this.groupOverrides.length === 0) return;
+
+        const groups = this.config['proxy-groups'] || [];
+        const validRefs = new Set(['DIRECT', 'REJECT']);
+        this.getProxyList().forEach(n => validRefs.add(n));
+        groups.forEach(g => { if (g?.name) validRefs.add(g.name); });
+
+        this.groupOverrides.forEach(override => {
+            const index = groups.findIndex(g => g?.name === override.name);
+            if (index < 0) return;
+            if (override.disabled) {
+                groups.splice(index, 1);
+                return;
+            }
+            const group = groups[index];
+            if (override.type) group.type = override.type;
+            if (Array.isArray(override.members)) {
+                group.proxies = override.members.filter(m => validRefs.has(m));
+            }
+            if (override.url) group.url = override.url;
+            if (override.interval) group.interval = override.interval;
+        });
+    }
+
     addCustomGroups() {
         if (!Array.isArray(this.customGroups) || this.customGroups.length === 0) return;
 

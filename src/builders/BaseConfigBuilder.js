@@ -25,10 +25,15 @@ export class BaseConfigBuilder {
         this.keywordEmojiRules = null;
         this.ipMaskEnabled = false;
         this.customGroups = [];
+        this.groupOverrides = [];
     }
 
     setCustomGroups(groups) {
         this.customGroups = Array.isArray(groups) ? groups : [];
+    }
+
+    setGroupOverrides(overrides) {
+        this.groupOverrides = Array.isArray(overrides) ? overrides : [];
     }
 
     setIpMask(enabled) {
@@ -444,8 +449,9 @@ export class BaseConfigBuilder {
         this.addCustomRuleGroups(proxyList);
         this.addFallBackGroup(proxyList);
 
-        // Add form-defined custom groups, then merge groups from upstream config.
+        // Add form-defined custom groups, then apply overrides to built-in groups.
         this.addCustomGroups();
+        this.applyGroupOverrides();
         if (this.pendingUserProxyGroups && this.pendingUserProxyGroups.length > 0) {
             this.mergeUserProxyGroups(this.pendingUserProxyGroups);
         }
@@ -456,6 +462,13 @@ export class BaseConfigBuilder {
      */
     addCustomGroups() {
         // Default: no-op. Child classes implement format-specific creation.
+    }
+
+    /**
+     * Apply overrides to built-in groups. Override in child classes.
+     */
+    applyGroupOverrides() {
+        // Default: no-op. Child classes implement format-specific overrides.
     }
 
     /**

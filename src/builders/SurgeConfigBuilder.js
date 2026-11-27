@@ -310,6 +310,40 @@ export class SurgeConfigBuilder extends BaseConfigBuilder {
         }
     }
 
+    applyGroupOverrides() {
+        if (!Array.isArray(this.groupOverrides) || this.groupOverrides.length === 0) return;
+
+        const groups = this.config['proxy-groups'] || [];
+        const validRefs = new Set(['DIRECT', 'REJECT']);
+        this.getProxyList().forEach(n => validRefs.add(n));
+        groups.forEach(line => {
+            const name = String(line || '').split(' = ')[0].trim();
+            if (name) validRefs.add(name);
+        });
+
+        this.groupOverrides.forEach(override => {
+            const index = groups.findIndex(line => String(line || '').split(' = ')[0].trim() === override.name);
+            if (index < 0) return;
+            if (override.disabled) {
+                groups.splice(index, 1);
+                return;
+            }
+            const existing = String(groups[index]);
+            const existingType = (existing.split(' = ')[1] || '').split(',')[0].trim() || 'select';
+            const type = override.type === 'select' ? 'select' : override.type === 'url-test' || override.type === 'fallback' ? 'url-test' : existingType;
+            const members = Array.isArray(override.members)
+                ? override.members.filter(m => validRefs.has(m))
+                : (existing.split(' = ')[1] || '').split(',').slice(1).map(s => s.trim()).filter(Boolean);
+            let extra = '';
+            if (type === 'url-test') {
+                const url = override.url || 'https://www.gstatic.com/generate_204';
+                const interval = override.interval || 300;
+                extra = `, url=${url}, interval=${interval}`;
+            }
+            groups[index] = this.createProxyGroup(override.name, type, members, extra);
+        });
+    }
+
     addCustomGroups() {
         if (!Array.isArray(this.customGroups) || this.customGroups.length === 0) return;
 

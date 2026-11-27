@@ -48,7 +48,7 @@ function readRuleParams(config) {
     try {
         const url = new URL(config);
         const result = {};
-        for (const key of ['selectedRules', 'customRules', 'group_by_country', 'include_auto_select', 'lang', 'keywordEmoji', 'keywordDomains', 'ipMask', 'customGroups']) {
+        for (const key of ['selectedRules', 'customRules', 'group_by_country', 'include_auto_select', 'lang', 'keywordEmoji', 'keywordDomains', 'ipMask', 'customGroups', 'groupOverrides']) {
             const value = url.searchParams.get(key);
             if (value !== null) result[key] = value;
         }
@@ -92,7 +92,7 @@ export function createSubconverterCompat({ app }) {
         }
         // Rule params may also arrive on the /sub request itself (EDT panels).
         // Config-URL values take precedence; fall back to the direct query.
-        for (const key of ['selectedRules', 'customRules', 'group_by_country', 'include_auto_select', 'customGroups']) {
+        for (const key of ['selectedRules', 'customRules', 'group_by_country', 'include_auto_select', 'customGroups', 'groupOverrides']) {
             if (configParams[key] !== undefined) continue;
             const value = c.req.query(key);
             if (value) internalUrl.searchParams.set(key, value);
@@ -106,6 +106,8 @@ export function createSubconverterCompat({ app }) {
         if (ipMask) internalUrl.searchParams.set('ipMask', ipMask);
         const customGroups = c.req.query('customGroups');
         if (customGroups) internalUrl.searchParams.set('customGroups', customGroups);
+        const groupOverrides = c.req.query('groupOverrides');
+        if (groupOverrides) internalUrl.searchParams.set('groupOverrides', groupOverrides);
         const groupByCountry = c.req.query('group_by_country');
         if (groupByCountry) internalUrl.searchParams.set('group_by_country', groupByCountry);
 

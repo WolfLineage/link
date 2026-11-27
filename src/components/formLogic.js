@@ -109,6 +109,10 @@ export const formLogicFn = (t) => {
             customShortCode: '',
             parsingUrl: false,
             parseDebounceTimer: null,
+            // Config presets (multi-profile auto-save)
+            configPresets: {},
+            activePreset: '默认',
+            _restoringPreset: false,
             // These will be populated from window.APP_TRANSLATIONS
             processingText: '',
             convertText: '',
@@ -159,6 +163,31 @@ export const formLogicFn = (t) => {
                 const initialUrlParams = new URLSearchParams(window.location.search);
                 this.currentConfigId = initialUrlParams.get('configId') || '';
 
+                // Load config presets
+                const savedPresets = localStorage.getItem('configPresets');
+                if (savedPresets) {
+                    try {
+                        const parsed = JSON.parse(savedPresets);
+                        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+                            this.configPresets = parsed;
+                        }
+                    } catch (e) {
+                        console.warn('Failed to parse configPresets:', e);
+                    }
+                }
+                const savedActive = localStorage.getItem('activeConfigPreset');
+                if (savedActive && this.configPresets[savedActive]) {
+                    this.activePreset = savedActive;
+                    // Restore the active preset's snapshot over the legacy fields.
+                    this._restoringPreset = true;
+                    this._applySnapshot(this.configPresets[savedActive]);
+                    this._restoringPreset = false;
+                } else if (!this.configPresets[this.activePreset]) {
+                    // Seed the default preset from current (legacy) values.
+                    this.configPresets[this.activePreset] = this._snapshot();
+                    localStorage.setItem('configPresets', JSON.stringify(this.configPresets));
+                }
+
                 // Load accordion states
                 const savedAccordion = localStorage.getItem('accordionSections');
                 if (savedAccordion) {
@@ -199,6 +228,158 @@ export const formLogicFn = (t) => {
                 });
                 this.$watch('customShortCode', val => localStorage.setItem('customShortCode', val));
                 this.$watch('accordionSections', val => localStorage.setItem('accordionSections', JSON.stringify(val)), { deep: true });
+
+                // Auto-save current preset whenever a config field changes.
+                const presetFields = [
+                    'input', 'groupByCountry', 'keywordDomains', 'keywordEmoji', 'ipMask',
+                    'includeAutoSelect', 'enableClashUI', 'externalController', 'externalUiDownloadUrl',
+                    'configType', 'configEditor', 'customUA', 'customShortCode',
+                    'selectedPredefinedRule', 'selectedRules'
+                ];
+                presetFields.forEach(field => {
+                    this.$watch(field, () => this._autoSavePreset(), { deep: true });
+                });
+
+                // Child components publish their JSON into hidden inputs; watch those too.
+                this.$nextTick(() => {
+                    ['customRules', 'customGroups', 'groupOverrides'].forEach(name => {
+                        const el = document.querySelector('input[name="' + name + '"]');
+                        if (el) {
+                            new MutationObserver(() => this._autoSavePreset()).observe(el, { attributes: true, attributeFilter: ['value'] });
+                        }
+                    });
+                });
+            },
+
+            // ---- Config preset helpers ----
+            _snapshot() {
+                return {
+                    input: this.input,
+                    groupByCountry: this.groupByCountry,
+                    keywordDomains: this.keywordDomains,
+                    keywordEmoji: this.keywordEmoji,
+                    ipMask: this.ipMask,
+                    includeAutoSelect: this.includeAutoSelect,
+                    enableClashUI: this.enableClashUI,
+                    externalController: this.externalController,
+                    externalUiDownloadUrl: this.externalUiDownloadUrl,
+                    configType: this.configType,
+                    configEditor: this.configEditor,
+                    customUA: this.customUA,
+                    customShortCode: this.customShortCode,
+                    selectedPredefinedRule: this.selectedPredefinedRule,
+                    selectedRules: JSON.parse(JSON.stringify(this.selectedRules || [])),
+                    customRulesJson: this._readHidden('customRules'),
+                    customGroupsJson: this._readHidden('customGroups'),
+                    groupOverridesJson: this._readHidden('groupOverrides')
+                };
+            },
+
+            _readHidden(name) {
+                const el = document.querySelector('input[name="' + name + '"]');
+                return el && el.value ? el.value : '';
+            },
+
+            _applySnapshot(snap) {
+                if (!snap) return;
+                const fields = [
+                    'input', 'groupByCountry', 'keywordDomains', 'keywordEmoji', 'ipMask',
+                    'includeAutoSelect', 'enableClashUI', 'externalController', 'externalUiDownloadUrl',
+                    'configType', 'configEditor', 'customUA', 'customShortCode',
+                    'selectedPredefinedRule', 'selectedRules'
+                ];
+                fields.forEach(f => {
+                    if (snap[f] !== undefined) this[f] = snap[f];
+                });
+                // Restore child components via events
+                if (snap.customRulesJson) {
+                    try {
+                        const parsed = JSON.parse(snap.customRulesJson);
+                        if (Array.isArray(parsed) && parsed.length) {
+                            window.dispatchEvent(new CustomEvent('restore-custom-rules', { detail: { rules: parsed } }));
+                        }
+                    } catch (e) { }
+                }
+                if (snap.customGroupsJson) {
+                    try {
+                        const parsed = JSON.parse(snap.customGroupsJson);
+                        if (Array.isArray(parsed) && parsed.length) {
+                            window.dispatchEvent(new CustomEvent('restore-custom-groups', { detail: { groups: parsed } }));
+                        }
+                    } catch (e) { }
+                }
+                if (snap.groupOverridesJson) {
+                    try {
+                        const parsed = JSON.parse(snap.groupOverridesJson);
+                        if (Array.isArray(parsed) && parsed.length) {
+                            window.dispatchEvent(new CustomEvent('restore-group-overrides', { detail: { overrides: parsed } }));
+                        }
+                    } catch (e) { }
+                }
+            },
+
+            _autoSavePreset() {
+                if (this._restoringPreset) return;
+                if (!this.activePreset) return;
+                this.configPresets[this.activePreset] = this._snapshot();
+                localStorage.setItem('configPresets', JSON.stringify(this.configPresets));
+                localStorage.setItem('activeConfigPreset', this.activePreset);
+            },
+
+            switchPreset(name) {
+                if (!name || name === this.activePreset) return;
+                // Save current before switching
+                this._autoSavePreset();
+                if (!this.configPresets[name]) {
+                    this.configPresets[name] = this._snapshot();
+                }
+                this.activePreset = name;
+                localStorage.setItem('activeConfigPreset', name);
+                this._restoringPreset = true;
+                this._applySnapshot(this.configPresets[name]);
+                this._restoringPreset = false;
+            },
+
+            addPreset() {
+                let name = window.prompt('新预设名称：', '方案 ' + (Object.keys(this.configPresets).length + 1));
+                if (!name || !name.trim()) return;
+                name = name.trim();
+                if (this.configPresets[name]) {
+                    window.alert('预设名称已存在');
+                    return;
+                }
+                this.configPresets[name] = this._snapshot();
+                this.switchPreset(name);
+            },
+
+            renamePreset() {
+                if (this.activePreset === '默认') {
+                    window.alert('默认预设不可重命名');
+                    return;
+                }
+                const name = window.prompt('重命名为：', this.activePreset);
+                if (!name || !name.trim() || name.trim() === this.activePreset) return;
+                const newName = name.trim();
+                if (this.configPresets[newName]) {
+                    window.alert('预设名称已存在');
+                    return;
+                }
+                this.configPresets[newName] = this.configPresets[this.activePreset];
+                delete this.configPresets[this.activePreset];
+                this.activePreset = newName;
+                localStorage.setItem('activeConfigPreset', newName);
+                localStorage.setItem('configPresets', JSON.stringify(this.configPresets));
+            },
+
+            deletePreset() {
+                if (this.activePreset === '默认') {
+                    window.alert('默认预设不可删除');
+                    return;
+                }
+                if (!window.confirm('确定删除预设「' + this.activePreset + '」？')) return;
+                delete this.configPresets[this.activePreset];
+                this.switchPreset('默认');
+                localStorage.setItem('configPresets', JSON.stringify(this.configPresets));
             },
 
             toggleAccordion(section) {
@@ -233,11 +414,18 @@ export const formLogicFn = (t) => {
                     if (Array.isArray(customRules) && customRules.length > 0) {
                         params.append('customRules', JSON.stringify(customRules));
                     params.append('customGroups', JSON.stringify(customGroups));
+                    params.append('groupOverrides', JSON.stringify(groupOverrides));
                     }
                     const customGroupsInput = document.querySelector('input[name="customGroups"]');
                     const customGroups = customGroupsInput && customGroupsInput.value ? JSON.parse(customGroupsInput.value) : [];
                     if (Array.isArray(customGroups) && customGroups.length > 0) {
                         params.append('customGroups', JSON.stringify(customGroups));
+                    params.append('groupOverrides', JSON.stringify(groupOverrides));
+                    }
+                    const groupOverridesInput = document.querySelector('input[name="groupOverrides"]');
+                    const groupOverrides = groupOverridesInput && groupOverridesInput.value ? JSON.parse(groupOverridesInput.value) : [];
+                    if (Array.isArray(groupOverrides) && groupOverrides.length > 0) {
+                        params.append('groupOverrides', JSON.stringify(groupOverrides));
                     }
                 } catch { }
 
@@ -406,6 +594,8 @@ export const formLogicFn = (t) => {
                     const customRules = customRulesInput && customRulesInput.value ? JSON.parse(customRulesInput.value) : [];
                     const customGroupsInput = document.querySelector('input[name="customGroups"]');
                     const customGroups = customGroupsInput && customGroupsInput.value ? JSON.parse(customGroupsInput.value) : [];
+                    const groupOverridesInput = document.querySelector('input[name="groupOverrides"]');
+                    const groupOverrides = groupOverridesInput && groupOverridesInput.value ? JSON.parse(groupOverridesInput.value) : [];
 
                     // Construct URLs
                     const origin = window.location.origin;
@@ -415,6 +605,7 @@ export const formLogicFn = (t) => {
                     params.append('selectedRules', JSON.stringify(this.selectedRules));
                     params.append('customRules', JSON.stringify(customRules));
                     params.append('customGroups', JSON.stringify(customGroups));
+                    params.append('groupOverrides', JSON.stringify(groupOverrides));
 
                     if (this.groupByCountry) params.append('group_by_country', 'true');
                     if (this.keywordDomains && this.keywordDomains.trim()) params.append('keywordDomains', this.keywordDomains.trim());
@@ -638,6 +829,21 @@ export const formLogicFn = (t) => {
                         }
                     } catch (e) {
                         console.warn('Failed to parse selectedRules:', e);
+                    }
+                }
+
+                // Extract groupOverrides
+                const groupOverrides = params.get('groupOverrides');
+                if (groupOverrides) {
+                    try {
+                        const parsed = JSON.parse(groupOverrides);
+                        if (Array.isArray(parsed) && parsed.length > 0) {
+                            window.dispatchEvent(new CustomEvent('restore-group-overrides', {
+                                detail: { overrides: parsed }
+                            }));
+                        }
+                    } catch (e) {
+                        console.warn('Failed to parse groupOverrides:', e);
                     }
                 }
 

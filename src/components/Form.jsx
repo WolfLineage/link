@@ -3,6 +3,7 @@
 import { PREDEFINED_RULE_SETS, UNIFIED_RULES } from '../config/index.js';
 import { CustomRules } from './CustomRules.jsx';
 import { CustomGroups } from './CustomGroups.jsx';
+import { GroupOverrides } from './GroupOverrides.jsx';
 import { TextareaWithActions } from './TextareaWithActions.jsx';
 import { ValidatedTextarea } from './ValidatedTextarea.jsx';
 import { formLogicFn } from './formLogic.js';
@@ -49,6 +50,31 @@ export const Form = (props) => {
   return (
     <div x-data="formData()" x-init="init()" class="max-w-4xl mx-auto">
       <form {...{'x-on:submit.prevent': 'submitForm'}} class="space-y-8">
+
+      {/* Config Presets */}
+      <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
+        <div class="flex flex-wrap items-center gap-2">
+          <i class="fas fa-bookmark text-primary-500"></i>
+          <span class="font-medium text-gray-700 dark:text-gray-300 text-sm">配置预设</span>
+          <select x-model="activePreset" x-on:change="switchPreset(activePreset)" class="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-sm text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-primary-500">
+            <template x-for="name in Object.keys(configPresets)" x-bind:key="name">
+              <option x-bind:value="name" x-text="name"></option>
+            </template>
+          </select>
+          <span class="text-xs text-gray-400 dark:text-gray-500">改动自动保存</span>
+          <div class="ml-auto flex gap-2">
+            <button type="button" x-on:click="addPreset()" class="px-3 py-1.5 rounded-lg bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-900/40 text-sm font-medium">
+              <i class="fas fa-plus mr-1"></i>新建
+            </button>
+            <button type="button" x-on:click="renamePreset()" class="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 text-sm font-medium">
+              重命名
+            </button>
+            <button type="button" x-on:click="deletePreset()" class="px-3 py-1.5 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 text-sm font-medium">
+              删除
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* Input Section */}
       <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-all duration-300 hover:shadow-md group">
@@ -162,6 +188,8 @@ export const Form = (props) => {
   <CustomRules t={t} />
 
   <CustomGroups t={t} />
+
+  <GroupOverrides t={t} />
 
     {/* General Options */ }
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
